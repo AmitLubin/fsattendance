@@ -1,14 +1,9 @@
 #! /usr/bin/python
 
-from dataclasses import replace
-from email import header
 import pandas as pd
 import jellyfish
 import os
 import sys
-import csv
-import mysql.connector
-from mysql.connector import Error
 
 # csv columns headers columns:
 ROOM_NAME = "Meeting Name"
@@ -64,56 +59,6 @@ def get_data(csvfile):
     max_overall = (latest_hour - earliest_hour) * 60 + (latest_min-earliest_min)
     return df, max_overall
 
-def get_data2(csvread):
-    with open(csvread, newline='', encoding="utf-16LE") as csvfile:
-        reader = csv.DictReader(csvfile, delimiter="\t")
-        for row in reader:
-            row[ROOM_START] = row[ROOM_START].replace('=','').replace('"','')
-            row[ROOM_FINISH] = row[ROOM_FINISH].replace('=','').replace('"','')
-            row[JOIN_TIME] = row[JOIN_TIME].replace('=','').replace('"','')
-            row[LEAVE_TIME] = row[LEAVE_TIME].replace('=','').replace('"','')
-            row[OVERALL_TIME] = row[OVERALL_TIME].replace(' mins', '')
-            # Need to implement SQL
-        
-        try: 
-            connection = mysql.connector.connect(
-                host = 'localhost',
-                database = 'attendance',
-                user = 'yona',
-                password='1234'
-            )
-            if connection.is_connected():
-                print('Connected to database!')
-            
-        except Error as e:
-            print('mysql error:', e)
-            if connection.is_connected():
-                connection.close()
-                print('Connection terminated')
-                exit(1)
-        
-        mysql_Create_Table = """ CREATE TABLE temp (
-                room_name varchar(30) NOT NULL,
-                room_start varchar(30) NOT NULL,
-                room_finish varchar(30) NOT NULL,
-                name varchar(20) NOT NULL,
-                email varchar(30) NOT NULL,
-                join_time varchar(30) NOT NULL,
-                leave_time varchar(30) NOT NULL,
-                overall_time varchar(30) NOT NULL,
-                platform varchar(10) NOT NULL,
-                PRIMARY KEY (email,join_time,leave_time,platform)
-            ) """
-        cursor = connection.cursor()
-        cursor.execute(" DROP TABLE IF EXISTS temp; ")
-        cursor.execute(mysql_Create_Table)
-        
-        mysql_Insert_To_Table = """  """
-        
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-    exit(1)
 
 def init(dirpath):
     """
@@ -123,7 +68,7 @@ def init(dirpath):
     """
     time_dict = {}
     csv_lst = get_files(dirpath)
-    init_data, m = get_data2(csv_lst[0])
+    init_data, m = get_data(csv_lst[0])
     dict_init(init_data, time_dict)
     df = pd.DataFrame(index=time_dict.keys())
     return df, csv_lst, time_dict
