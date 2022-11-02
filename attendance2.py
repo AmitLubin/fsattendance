@@ -71,7 +71,8 @@ def get_data(csvread, cursor):
                 overall_time varchar(30) NOT NULL,
                 platform varchar(30) NOT NULL  
             ) """
-         
+        
+        cursor.execute(" DROP TABLE IF EXISTS temp; ") 
         cursor.execute(mysql_Create_Table)
         
         mysql_Insert_To_Table = """ INSERT INTO temp (
@@ -274,7 +275,7 @@ def insert_dict(time_dict, cursor, connection):
     connection.commit()
         
 def getFullAttendance(cursor):
-    cursor.execute(" SELECT email FROM attendance; ")
+    cursor.execute(" SELECT * FROM attendance; ")
     res = cursor.fetchall()
     print(res)
 
