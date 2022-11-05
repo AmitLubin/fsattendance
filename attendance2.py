@@ -1,11 +1,13 @@
 #! /usr/bin/python
 
-import jellyfish
+import jellyfish # jellyfish requires installation
 import os
 import sys
 import csv
-import mysql.connector
+import mysql.connector # mysql requires installation
 from mysql.connector import Error
+from dotenv import load_dotenv # dotenv requires installation
+from pathlib import Path
 
 def get_files(dirpath):
     """
@@ -27,12 +29,20 @@ def get_files(dirpath):
 
 def init_sql():
     
+    envpath = Path('./environmentals/.env')
+    load_dotenv(dotenv_path=envpath)
+    
+    mysql_user = os.getenv("MYSQL_SECRET_USER")
+    mysql_password = os.getenv("MYSQL_SECRET_PASS")
+    mysql_host = os.getenv("MYSQL_HOST")
+    mysql_database = os.getenv("MYSQL_DATABASE")
+    
     try: 
         connection = mysql.connector.connect(
-            host = 'localhost',
-            database = 'attendance',
-            user = 'yona',
-            password='1234'
+            host = mysql_host,
+            database = mysql_database,
+            user = mysql_user,
+            password=mysql_password
         )
         if connection.is_connected():
             print('Connected to database!')
@@ -129,13 +139,13 @@ def check_spell(username, time_dict):
             return user
     return
 
-def getTime(join, leave):
+def get_time(join, leave):
     
     time = join.rsplit(' ')[1] + ' - ' + leave.rsplit(' ')[1]
     
     return time
 
-def platformUpdater(userPlatform, platform):
+def platform_updater(userPlatform, platform):
     
     if userPlatform == '':
         return platform
@@ -144,7 +154,7 @@ def platformUpdater(userPlatform, platform):
     else:
         return userPlatform
 
-def timeUpdater(timeArray):
+def time_updater(timeArray):
     
     if len(timeArray) < 2: return
     
@@ -210,20 +220,20 @@ def sql_arrange(time_dict, cursor, max_time):
         else:
             username = fix
         
-        time = getTime(line[JOIN_TIME], line[LEAVE_TIME])
+        time = get_time(line[JOIN_TIME], line[LEAVE_TIME])
         time_dict[username]['time'].append(time)
-        time_dict[username]['platform'] = platformUpdater(time_dict[username]['platform'], line[PLATFORM])
+        time_dict[username]['platform'] = platform_updater(time_dict[username]['platform'], line[PLATFORM])
         
     for user in time_dict.keys():
         if len(time_dict[user]['time']) > 1:
-            time_dict[user]['overall time'] =  timeUpdater(time_dict[user]['time'])
+            time_dict[user]['overall time'] =  time_updater(time_dict[user]['time'])
             if time_dict[user]['overall time'] > max_time:
                 time_dict[user]['overall time'] = max_time
         
         time_dict[user]['time string'] = ', '.join(time_dict[user]['time'])
         del time_dict[user]['time']
 
-def printTimeDict(time_dict):
+def print_time_dict(time_dict):
     for user in time_dict.keys():
         print(time_dict[user])            
 
@@ -274,12 +284,21 @@ def insert_dict(time_dict, cursor, connection):
     
     connection.commit()
         
-def getFullAttendance(cursor):
+def print_full_attendance(cursor):
     cursor.execute(" SELECT * FROM attendance; ")
     res = cursor.fetchall()
     print(res)
 
-def init(dirpath):
+def get_table(cursor):
+    cursor.execute(" SELECT * FROM attendance; ")
+    return cursor.fetchall()
+    
+def disable_connection(connection, cursor):
+    cursor.close()
+    connection.close()
+    return 0
+
+def post_csv(dirpath):
     """
     initiates all parameters that are needed for the script: the dictionary of the participants, list of csv files
     and the initiative pd.DataFrame
@@ -291,10 +310,23 @@ def init(dirpath):
         time_dict = {}
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
-        #printTimeDict(time_dict)
-        insert_dict(time_dict, cursor, connection) # delete attendance table needs to be removed
-    #getFullAttendance(cursor)
-    
+        #print_time_dict(time_dict)
+        insert_dict(time_dict, cursor, connection)
+    #get_full_attendance(cursor)
+    #results = get_table(cursor)
+    disable_connection(connection, cursor)
+
+def post_api(path):
+    if not os.path.isdir(path):
+        return "<h1>Not a directory</h1>"
+    post_csv(path)
+    return "<h1> Done! </h1>"
+
+def get_api():
+    connection, cursor = init_sql()
+    results = get_table(cursor)
+    disable_connection(connection, cursor)
+    return results
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -304,7 +336,7 @@ if __name__ == '__main__':
     if not os.path.isdir(path):
         print("This path is not a directory")
         exit(1)
-
-    init(path)
+    
+    post_csv(path)
     
 
