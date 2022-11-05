@@ -29,7 +29,7 @@ def get_files(dirpath):
 
 def init_sql():
     
-    envpath = Path('./environmentals/.env')
+    envpath = Path('../environmentals/.env')
     load_dotenv(dotenv_path=envpath)
     
     mysql_user = os.getenv("MYSQL_SECRET_USER")
