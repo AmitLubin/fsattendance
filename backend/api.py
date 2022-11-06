@@ -7,6 +7,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def get_mysql():
     results = get_api() #return a single cell array with lots of tuples inside, viewed as string arrays in html
+    if len(results[0]) == 0: return "<h1> no results! </h1>"
     return results
 
 @app.route('/', methods=['POST'])
@@ -21,4 +22,4 @@ def insert_csv():
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0') # the host ip is for docker reasons only
