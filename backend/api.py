@@ -1,5 +1,5 @@
 from flask import Flask, request # flask requires installation
-from attendance2 import post_api, get_api
+from attendance import post_api, get_api
 
 
 app = Flask(__name__)
@@ -12,6 +12,8 @@ def get_mysql():
 @app.route('/', methods=['POST'])
 def insert_csv():
     folder = str(request.get_data())
+    print(folder)
+    print(request.get_data())
     if folder[0] == 'b': 
         folder = folder.rsplit('b')[1]
     folder = folder.replace("'", "")
@@ -19,5 +21,4 @@ def insert_csv():
     
 
 if __name__ == '__main__':
-
-    app.run()
+    app.run(host='0.0.0.0')

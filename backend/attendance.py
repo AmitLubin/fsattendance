@@ -1,23 +1,13 @@
 #! /usr/bin/python
 
-import pandas as pd
-import jellyfish
+import jellyfish # jellyfish requires installation
 import os
 import sys
-
-# csv columns headers columns:
-ROOM_NAME = "Meeting Name"
-ROOM_START = "Meeting Start Time"
-ROOM_FINISH = "Meeting End Time"
-NAMES = "Name"
-EMAILS = "Attendee Email"
-JOIN_TIME = "Join Time"
-JOIN_TIME_NUM = 5
-LEAVE_TIME = "Leave Time"
-LEAVE_TIME_NUM = 6
-OVERALL_TIME = "Attendance Duration"
-PLATFORM = "Connection Type"
-
+import csv
+import mysql.connector # mysql requires installation
+from mysql.connector import Error
+from dotenv import load_dotenv # dotenv requires installation
+from pathlib import Path
 
 def get_files(dirpath):
     """
@@ -37,248 +27,306 @@ def get_files(dirpath):
         exit(1)
     return attend_files
 
+def init_sql():
+    
+    #envpath = Path('../environmentals/.env') use when not in docker image
+    load_dotenv()
+    
+    mysql_user = os.getenv("MYSQL_SECRET_USER")
+    mysql_password = os.getenv("MYSQL_SECRET_PASS")
+    mysql_host = os.getenv("MYSQL_HOST")
+    mysql_database = os.getenv("MYSQL_DATABASE")
+    
+    try: 
+        connection = mysql.connector.connect(
+            host = mysql_host,
+            database = mysql_database,
+            user = mysql_user,
+            password=mysql_password
+        )
+        if connection.is_connected():
+            print('Connected to database!')
+            
+    except Error as e:
+        print('mysql error:', e)
+        if connection.is_connected():
+            connection.close()
+            print('Connection terminated')
+            exit(1)
+    
+    cursor = connection.cursor()
+    
+    return connection, cursor
 
-def get_data(csvfile):
-    """
-    analyzes the data from a csv file and returning it as a pd.DataFrame
-    :param csvfile: string of a path to a csv file
-    :return: pd.DataFrame sorted by the join times and the maximal overall login time in the file
-    """
-    df = pd.read_csv(csvfile, encoding="utf-16LE", sep="\t")
-    df = df.replace('\"', '', regex=True)
-    df = df.replace('=', '', regex=True)
-    # calculate maximal overall login time in the file:
-    df.sort_values(by=[LEAVE_TIME], ascending=False, inplace=True)  # descending order by leave time
-    latest = str(df.iloc[0, LEAVE_TIME_NUM]).rsplit(" ")[1]     # take first row after sort
-    latest_hour = int(latest.rsplit(":")[0])
-    latest_min = int(latest.rsplit(":")[1])
-    df.sort_values(by=[JOIN_TIME], ascending=True, inplace=True)    # ascending order by join time
-    earliest = str(df.iloc[0, JOIN_TIME_NUM]).rsplit(" ")[1]  # take first row after sort
-    earliest_hour = int(earliest.rsplit(":")[0])
-    earliest_min = int(earliest.rsplit(":")[1])
+def get_data(csvread, cursor):
+    # csv columns headers columns:
+    ROOM_NAME = "Meeting Name"
+    ROOM_START = "Meeting Start Time"
+    ROOM_FINISH = "Meeting End Time"
+    JOIN_TIME = "Join Time"
+    LEAVE_TIME = "Leave Time"
+    OVERALL_TIME = "Attendance Duration"
+    
+    with open(csvread, newline='', encoding="utf-16LE") as csvfile:
+        reader = csv.DictReader(csvfile, delimiter="\t")
+                  
+        mysql_Create_Table = """ CREATE TABLE temp (
+                room_name varchar(50) NOT NULL,
+                room_start varchar(30) NOT NULL,
+                room_finish varchar(30) NOT NULL,
+                name varchar(20) NOT NULL,
+                email varchar(30) NOT NULL,
+                join_time varchar(30) NOT NULL,
+                leave_time varchar(30) NOT NULL,
+                overall_time varchar(30) NOT NULL,
+                platform varchar(30) NOT NULL  
+            ) """
+        
+        cursor.execute(" DROP TABLE IF EXISTS temp; ") 
+        cursor.execute(mysql_Create_Table)
+        
+        mysql_Insert_To_Table = """ INSERT INTO temp (
+                room_name,
+                room_start,
+                room_finish,
+                name,
+                email,
+                join_time,
+                leave_time,
+                overall_time,
+                platform) VALUES (
+                %(Meeting Name)s,
+                %(Meeting Start Time)s,
+                %(Meeting End Time)s,
+                %(Name)s,
+                %(Attendee Email)s,
+                %(Join Time)s,
+                %(Leave Time)s,
+                %(Attendance Duration)s,
+                %(Connection Type)s
+            ) """
+        
+        for row in reader:
+            row[ROOM_START] = row[ROOM_START].replace('=','').replace('"','')
+            row[ROOM_FINISH] = row[ROOM_FINISH].replace('=','').replace('"','')
+            row[JOIN_TIME] = row[JOIN_TIME].replace('=','').replace('"','')
+            row[LEAVE_TIME] = row[LEAVE_TIME].replace('=','').replace('"','')
+            row[OVERALL_TIME] = row[OVERALL_TIME].replace(' mins', '')
+            row[ROOM_NAME] = row['\ufeffMeeting Name']
+            del row['\ufeffMeeting Name']
+            
+            cursor.execute(mysql_Insert_To_Table, row)
+        
+    selectFromQuery = """ SELECT * FROM temp ORDER BY join_time ASC LIMIT 1 """
+    cursor.execute(selectFromQuery)
+    res = cursor.fetchone()
+    earliest = res[5].rsplit(' ')[1]
+    earliest_hour = int(earliest.rsplit(':')[0])
+    earliest_min = int(earliest.rsplit(':')[1])
+    selectFromQuery = """ SELECT * FROM temp ORDER BY leave_time DESC LIMIT 1 """
+    cursor.execute(selectFromQuery)
+    res = cursor.fetchone()
+    latest = res[6].rsplit(' ')[1]
+    latest_hour = int(latest.rsplit(':')[0])
+    latest_min = int(latest.rsplit(':')[1])
     max_overall = (latest_hour - earliest_hour) * 60 + (latest_min-earliest_min)
-    return df, max_overall
+    
+    return max_overall
+
+def check_spell(username, time_dict):
+    for user in time_dict.keys():
+        if jellyfish.damerau_levenshtein_distance(user, username) < 3:
+            return user
+    return
+
+def get_time(join, leave):
+    
+    time = join.rsplit(' ')[1] + ' - ' + leave.rsplit(' ')[1]
+    
+    return time
+
+def platform_updater(userPlatform, platform):
+    
+    if userPlatform == '':
+        return platform
+    elif userPlatform != platform:
+        return 'mixed'
+    else:
+        return userPlatform
+
+def time_updater(timeArray):
+    
+    if len(timeArray) < 2: return
+    
+    i = 0
+    while i + 1 < len(timeArray):
+        start = timeArray[i].rsplit(' - ')[0]  # take first login time
+        end = timeArray[i].rsplit(' - ')[1]  # take first logout time
+        start1 = timeArray[i + 1].rsplit(' - ')[0]  # take second login time
+        end1 = timeArray[i + 1].rsplit(' - ')[1]  # take second logout time
+        if end >= end1:  # it means, that user was logged in from several devices
+            del (timeArray[i + 1])
+        elif start1 <= end <= end1:  # if the logged time frames overlap then take the longest frame
+            timeArray[i] = start + " - " + end1
+            del (timeArray[i + 1])
+        else:
+            i += 1
+        
+    overall = 0
+    for frame in timeArray:
+        sh = int(frame.rsplit(":")[0])  # starting hour
+        sm = int(frame.rsplit(":")[1])  # starting minute
+        eh = int(frame.rsplit(":")[2].rsplit("- ")[1])  # ending hour
+        em = int(frame.rsplit(":")[3])  # ending minute
+
+        overall += (eh - sh) * 60 + (em - sm)
+            
+    return overall
+        
 
 
-def init(dirpath):
+def sql_arrange(time_dict, cursor, max_time):
+    ROOM_NAME = 0
+    ROOM_START = 1
+    ROOM_FINISH = 2
+    NAME = 3
+    EMAIL = 4
+    JOIN_TIME = 5
+    LEAVE_TIME = 6
+    OVERALL_TIME = 7
+    PLATFORM = 8
+    
+    cursor.execute('SELECT * FROM temp ORDER BY join_time ASC')
+    tempList = cursor.fetchall()
+    for line in tempList:
+        
+        if "bynet" in line[EMAIL] or "8200" in line[EMAIL] or "nan" in line[EMAIL] or '' == line[EMAIL]: 
+            continue
+        
+        username = line[EMAIL].rsplit('@')[0]
+        fix =  check_spell(username, time_dict)
+        if not fix:
+            time_dict[username] = {
+                'room': line[ROOM_NAME],
+                'room start': line[ROOM_START],
+                'room finish': line[ROOM_FINISH],
+                'name': line[NAME],
+                'email': line[EMAIL],
+                'time': [],
+                'time string': '',
+                'overall time': line[OVERALL_TIME],
+                'platform': ''
+            }
+        else:
+            username = fix
+        
+        time = get_time(line[JOIN_TIME], line[LEAVE_TIME])
+        time_dict[username]['time'].append(time)
+        time_dict[username]['platform'] = platform_updater(time_dict[username]['platform'], line[PLATFORM])
+        
+    for user in time_dict.keys():
+        if len(time_dict[user]['time']) > 1:
+            time_dict[user]['overall time'] =  time_updater(time_dict[user]['time'])
+            if time_dict[user]['overall time'] > max_time:
+                time_dict[user]['overall time'] = max_time
+        
+        time_dict[user]['time string'] = ', '.join(time_dict[user]['time'])
+        del time_dict[user]['time']
+
+def print_time_dict(time_dict):
+    for user in time_dict.keys():
+        print(time_dict[user])            
+
+def insert_dict(time_dict, cursor, connection): 
+    create_attendance_table = """CREATE TABLE IF NOT EXISTS attendance(
+            room_name varchar(50) NOT NULL,
+            room_start varchar(30) NOT NULL,
+            room_finish varchar(30) NOT NULL,
+            name varchar(20) NOT NULL,
+            email varchar(30) NOT NULL,
+            time varchar(200) NOT NULL,
+            overall_time varchar(30) NOT NULL,
+            platform varchar(30) NOT NULL,
+            PRIMARY KEY(room_name, room_start, email)
+        )"""
+    
+    #cursor.execute(" DROP TABLE IF EXISTS attendance; ") #need to disable laters
+    cursor.execute(create_attendance_table)
+    for user in time_dict.keys():
+        
+        insertOrUpdateQuery = """
+            INSERT INTO attendance (
+                room_name,
+                room_start,
+                room_finish,
+                name,
+                email,
+                time,
+                overall_time,
+                platform
+            ) VALUES (
+                %(room)s,
+                %(room start)s,
+                %(room finish)s,
+                %(name)s,
+                %(email)s,
+                %(time string)s,
+                %(overall time)s,
+                %(platform)s
+            ) ON DUPLICATE KEY UPDATE
+                name = %(name)s,
+                time = %(time string)s,
+                overall_time = %(overall time)s,
+                platform = %(platform)s
+        """
+        
+        cursor.execute(insertOrUpdateQuery, time_dict[user])
+    
+    connection.commit()
+        
+def print_full_attendance(cursor):
+    cursor.execute(" SELECT * FROM attendance; ")
+    res = cursor.fetchall()
+    print(res)
+
+def get_table(cursor):
+    cursor.execute(" SELECT * FROM attendance; ")
+    return cursor.fetchall()
+    
+def disable_connection(connection, cursor):
+    cursor.close()
+    connection.close()
+    return 0
+
+def post_csv(dirpath):
     """
     initiates all parameters that are needed for the script: the dictionary of the participants, list of csv files
     and the initiative pd.DataFrame
     :return: pd.DataFrame, list of csv files and the dictionary of the participants
     """
-    time_dict = {}
     csv_lst = get_files(dirpath)
-    init_data, m = get_data(csv_lst[0])
-    dict_init(init_data, time_dict)
-    df = pd.DataFrame(index=time_dict.keys())
-    return df, csv_lst, time_dict
+    connection, cursor = init_sql()
+    for i in range(len(csv_lst)):
+        time_dict = {}
+        max_overall = get_data(csv_lst[i], cursor)
+        sql_arrange(time_dict, cursor, max_overall)
+        #print_time_dict(time_dict)
+        insert_dict(time_dict, cursor, connection)
+    #get_full_attendance(cursor)
+    #results = get_table(cursor)
+    disable_connection(connection, cursor)
 
+def post_api(path):
+    if not os.path.isdir(path):
+        return "<h1>Not a directory</h1>"
+    post_csv(path)
+    return "<h1> Done! </h1>"
 
-def check_spell(df_email, time_dict):
-    """
-    the function checks if an email is misspelled by up to several errors
-    if so, then the function returns the correct one, else, the function returns false
-    :param df_email: string of an email from the DataFrame
-    :param time_dict: dictionary of participants
-    :return: String or void
-    """
-    for mail in time_dict.keys():
-        if jellyfish.damerau_levenshtein_distance(df_email, mail) < 3:
-            return mail
-    return
-
-
-def check_hebrew(s):
-    """
-    checks if a string contains any hebrew letter, if so returns true, else returns false
-    :param s: string
-    :return: bool
-    """
-    for c in s:
-        if ord('\u05d0') <= ord(c) <= ord('\u05ea'):    # if the character is in range of the unicode of hebrew letters
-            return True
-    return False
-
-
-def dict_init(df, time_dict):
-    """
-    initiates the participant's dictionary for every file
-    :param df: pd.DataFrame
-    :param time_dict: dictionary of the participants
-    """
-    # initializing all keys:
-    for username in time_dict.keys():
-        time_dict[username]['time'] = []
-        time_dict[username]['overall'] = 0
-
-    for i, row in df.iterrows():
-        file_email = str(row[EMAILS])
-        username = file_email.rsplit('@')[0]
-        if "bynet" in file_email or "8200" in file_email or "nan" in file_email:  # skipping the non-students
-            continue
-        file_name = str(row[NAMES])
-        if not check_spell(username, time_dict):  # if the mail is not already in the dictionary- add it
-            time_dict[username] = {'time': [], 'overall': 0, 'name': file_name}
-        else:   # if it is then update it
-            username = check_spell(username, time_dict)   # correcting
-            if not check_hebrew(file_name):   # if the name in the file is not in hebrew
-                # if there is a more accurate name let's update it
-                if len(time_dict[username]['name']) < len(file_name):
-                    time_dict[username]['name'] = file_name
-                # if the dictionary's name is in hebrew, and we have an english name we should update it to be english
-                if check_hebrew(time_dict[username]['name']):
-                    time_dict[username]['name'] = file_name
-
-
-def dict_update(email, time_dict, start, end, overall):
-    """
-    Formats the inputs: start and end times to a single string "start time - end time".
-    calculates the overall login time.
-    Updates the dictionary with the given values
-    :param email: string
-    :param time_dict: dictionary - {email : {time, overall}}
-    :param start: string login time
-    :param end: string logout time
-    :param overall: string overall logged in time
-    """
-    time_dict[email]['time'].append(start.rsplit(' ')[1] + " - " + end.rsplit(' ')[1])
-    time_dict[email]['overall'] += int(overall.replace(' mins', ''))
-
-
-def dict_build(df, time_dict):
-    """
-    Building the dictionary based on the input
-    :param df: DataFrame - input's data-frame
-    :param time_dict:
-    """
-    dict_init(df, time_dict)
-    for index, row in df.iterrows():
-        file_email = str(row[EMAILS])
-        username = file_email.rsplit('@')[0]
-        if time_dict.get(username):  # if the email is spelled correctly then it is in the dictionary
-            dict_update(username, time_dict, row[JOIN_TIME], row[LEAVE_TIME], row[OVERALL_TIME])
-        elif "bynet" in file_email or "8200" in file_email or "nan" in file_email:  # skipping the non-students:
-            continue
-        else:
-            # checking if is misspelled and correcting it:
-            username = check_spell(username, time_dict)
-            if username:  # if such email exists then consider it as a misspelled email
-                dict_update(username, time_dict, row[JOIN_TIME], row[LEAVE_TIME], row[OVERALL_TIME])
-    special_cases(time_dict)
-    return time_dict
-
-
-def special_cases(time_dict):
-    """
-    checks for special cases in the login time frames
-    :param time_dict: dictionary - {email : {time, overall}}
-    """
-    for mail in time_dict.keys():
-        times = time_dict[mail]['time']
-        if len(times) < 2:
-            continue
-        special = False
-        # checking for a special case in logging times:
-        i = 0
-        while i + 1 < len(times):  # while a next time frame exists
-            start = times[i].rsplit(' - ')[0]  # take first login time
-            end = times[i].rsplit(' - ')[1]  # take first logout time
-            start1 = times[i + 1].rsplit(' - ')[0]  # take second login time
-            end1 = times[i + 1].rsplit(' - ')[1]  # take second logout time
-            if end >= end1:  # it means, that user was logged in from several devices
-                del (times[i + 1])
-                special = True
-            elif start1 <= end <= end1:  # if the logged time frames overlap then take the longest frame
-                times[i] = start + " - " + end1
-                del (times[i + 1])
-                special = True
-            else:
-                i += 1
-
-        if special:  # if a special case occurred, calculate the correct overall logged time
-            overall = 0
-            for frame in times:
-                sh = int(frame.rsplit(":")[0])  # starting hour
-                sm = int(frame.rsplit(":")[1])  # starting minute
-                eh = int(frame.rsplit(":")[2].rsplit("- ")[1])  # ending hour
-                em = int(frame.rsplit(":")[3])  # ending minute
-
-                overall += (eh - sh) * 60 + (em - sm)
-            time_dict[mail]['overall'] = overall
-
-
-def add_csv(file, time_dict, new_overall):
-    """
-    adding every csv as a new column and analyzing it
-    :param file: string of a csv file
-    :param time_dict: dictionary
-    :param new_overall: new pd.DataFrame for the overall login time
-    :return: the new pd.DataFrame of the overall login time
-    after adding the column. also returning the maximum login time in the file
-    """
-    df, max_time = get_data(file)
-    # adding values to dictionary:
-    dict_build(df, time_dict)
-    # building the new rows dictionaries:
-    overall_dict = {}
-    for mail in time_dict.keys():
-        overall = time_dict[mail]['overall']
-        overall_dict[mail] = overall
-    file_date = str(df.iloc[1, JOIN_TIME_NUM]).rsplit(" ")[0]
-
-    if file_date in new_overall.columns:    # if a meeting has several files than add
-        for i, row in new_overall.iterrows():
-            overall_dict[i] += row[file_date]
-
-    new_overall = add_col(new_overall, file_date, overall_dict)
-    return new_overall, max_time
-
-
-def add_col(df, col_name, time_dict):
-    """
-    adding a column to a pd.DataFrame.
-    :param df: pd.DataFrame
-    :param col_name: string of the date of the file
-    :param time_dict: dictionary of login time per user
-    :return:
-    """
-    df = pd.DataFrame(df, index=time_dict.keys())   # updating the indexes to be up-to-date with all files
-    df[col_name] = df.index.map(time_dict)
-    return df
-
-
-def add_names(df, time_dict):
-    """
-    add the updated names to the second row of the DataFrame
-    :param df: pd.DataFrame
-    :param time_dict: dictionary of names
-    :return:
-    """
-    names = {}
-    for key in time_dict.keys():
-        names[key] = time_dict[key]['name']
-
-    names_col = df.index.map(names)
-    df.insert(loc=0, column='names', value=names_col)
-    return df
-
-
-def add_avg_time(df, sum_max):
-    """
-    adds an average time row to the end of the DataFrame
-    :param df: pd.DataFrame
-    :param sum_max: sum of maximum time of every row
-    :return: pd.DataFrame
-    """
-    sum_row = pd.DataFrame(df.sum(axis=1, numeric_only=True))
-    avg = {}
-    i = 0
-    for idx in df.index:
-        avg[idx] = str((sum_row.iloc[i, 0] / sum_max) * 100) + " %"
-        i += 1
-    df['average'] = df.index.map(avg)
-    return df
-
+def get_api():
+    connection, cursor = init_sql()
+    results = get_table(cursor)
+    disable_connection(connection, cursor)
+    return results
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -288,15 +336,7 @@ if __name__ == '__main__':
     if not os.path.isdir(path):
         print("This path is not a directory")
         exit(1)
-
-    new_df, csv_files, init_dict = init(path)
-    sum_maxes = 0
-    for csv in csv_files:
-        new_df, max_row = add_csv(csv, init_dict, new_df)
-        sum_maxes += max_row
-
-    new_df.sort_index(axis=1, inplace=True)
-    new_df = add_avg_time(new_df, sum_maxes)
-    new_df = add_names(new_df, init_dict)
-    new_df.to_csv('attendance.csv')
+    
+    post_csv(path)
+    
 
