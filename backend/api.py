@@ -8,11 +8,10 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def get_mysql():
-    results = get_api() #return a single cell array with lots of tuples inside, viewed as string arrays in html
+    results = get_api() #return an array with lots of tuples inside, viewed as string arrays in html
     if len(results[0]) == 0: return "<h1> no results! </h1>"
-    #resultsJSON = json.dumps(results)
-    #print(resultsJSON)
-    return {"name": "shit"}
+    resultsJSON = json.dumps(results)
+    return resultsJSON
     
 
 @app.route('/', methods=['POST'])

@@ -1,24 +1,32 @@
-import React from "react";
+import { Component } from "react";
 import './css/App.css'
 
-const App = () => {
-    let data = {};
-    fetch('http://localhost:5000/')
-        .then(res => res.json())
-        .then(newData => console.log(newData));
-        
-    //console.log(data);
+class App extends Component {
+    constructor(){
+        super();
+    }
+
+    componentDidMount(){
+        fetch('http://localhost:5000/')
+            .then(res => res.json())
+            .then(newData => console.log(newData));
+    }
     
-    return(
-        <div className="background">
-            <div className="menu">
-                
+        
+    
+    render() {
+        return(
+            <div className="background">
+                <div className="menu">
+                    
+                </div>
+                <div className="list">
+                    
+                </div>
             </div>
-            <div className="list">
-                
-            </div>
-        </div>
-    );
+        );
+    }
+    
 }
 
 export default App;
