@@ -25,3 +25,53 @@
     left: 50%;
     transform: translate( -50%, -50%);
 }
+
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#thead {
+    display: block;
+    width: 100%;
+}
+
+#tbody {
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    max-height: 400px;
+    width: 101.8%;
+}
+
+.cell{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: table-cell;
+    width: 10%;
+    border: solid black 1px;
+    text-align: center;
+    height: 40px;
+}
+
+.mailCell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: table-cell;
+    width: 30%;
+    border: solid black 1px;
+    text-align: center;
+    height: 40px;
+}
+
+.nameCell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: table-cell;
+    width: 10%;
+    border: solid black 1px;
+    padding-right: 1px;
+    text-align: center;
+    height: 40px;
+}
