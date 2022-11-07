@@ -1,14 +1,19 @@
 from flask import Flask, request # flask requires installation
+from flask_cors import CORS
 from attendance import post_api, get_api
-
+import json
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/', methods=['GET'])
 def get_mysql():
     results = get_api() #return a single cell array with lots of tuples inside, viewed as string arrays in html
     if len(results[0]) == 0: return "<h1> no results! </h1>"
-    return results
+    #resultsJSON = json.dumps(results)
+    #print(resultsJSON)
+    return {"name": "shit"}
+    
 
 @app.route('/', methods=['POST'])
 def insert_csv():

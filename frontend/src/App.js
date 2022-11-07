@@ -1,8 +1,23 @@
 import React from "react";
+import './css/App.css'
 
 const App = () => {
-    return (
-        <h1>App works!</h1>
+    let data = {};
+    fetch('http://localhost:5000/')
+        .then(res => res.json())
+        .then(newData => console.log(newData));
+        
+    //console.log(data);
+    
+    return(
+        <div className="background">
+            <div className="menu">
+                
+            </div>
+            <div className="list">
+                
+            </div>
+        </div>
     );
 }
 
