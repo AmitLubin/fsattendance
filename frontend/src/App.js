@@ -1,15 +1,22 @@
 import { Component } from "react";
 import './css/App.css'
+import Table from "./Table"
 
 class App extends Component {
+    state = { data: [] };
+    
     constructor(){
         super();
     }
 
-    componentDidMount(){
-        fetch('http://localhost:5000/')
+    async componentDidMount(){
+        let tempArray = [];
+        await fetch('http://localhost:5000/')
             .then(res => res.json())
-            .then(newData => console.log(newData));
+            .then(newData => {
+                tempArray = tempArray.concat(newData);
+            });
+        this.setState({ data: tempArray });
     }
     
         
@@ -21,7 +28,9 @@ class App extends Component {
                     
                 </div>
                 <div className="list">
-                    
+                    <div className="table">
+                        <Table queries={this.state.data}/>
+                    </div>
                 </div>
             </div>
         );
