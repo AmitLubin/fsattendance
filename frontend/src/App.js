@@ -1,5 +1,6 @@
 import { Component } from "react";
 import './css/App.css'
+import Menu from "./Menu";
 import Table from "./Table"
 
 class App extends Component {
@@ -25,11 +26,11 @@ class App extends Component {
         return(
             <div className="background">
                 <div className="menu">
-                    <h1>Menu</h1>
+                    <Menu />
                 </div>
                 <div className="list">
                     <div className="table">
-                        <table id="table">
+                        <table>
                             <thead id="thead">
                                 <tr>
                                     <th className="cell">Room name</th>
