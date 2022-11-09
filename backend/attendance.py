@@ -32,8 +32,8 @@ def init_sql():
     #envpath = Path('../environmentals/.env') #use when not in docker image
     load_dotenv()
     
-    mysql_user = os.getenv("MYSQL_SECRET_USER")
-    mysql_password = os.getenv("MYSQL_SECRET_PASS")
+    mysql_user = os.getenv("MYSQL_USER")
+    mysql_password = os.getenv("MYSQL_PASSWORD")
     mysql_host = os.getenv("MYSQL_HOST")
     mysql_database = os.getenv("MYSQL_DATABASE")
     
