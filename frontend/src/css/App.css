@@ -33,6 +33,7 @@ table {
     table-layout: fixed;
     border-collapse: collapse;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    background-color: #009879;
 }
 
 #thead {
@@ -43,6 +44,7 @@ table {
 }
 
 th {
+    border: solid black 1px;
     background-color: #009879;
 }
 
@@ -59,42 +61,27 @@ th {
     font-weight: 800;
 }
 
-.cell{
+td {
     overflow: hidden;
     text-overflow: ellipsis;
     display: table-cell;
-    width: 90px;
     border: solid black 1px;
     text-align: center;
     height: 40px;
+}
+
+.cell{
+    width: 90px;
 }
 
 .mailCell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: table-cell;
     width: 230px;
-    border: solid black 1px;
-    text-align: center;
-    height: 40px;
 }
 
 .nameCell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: table-cell;
-    width: 140px;
-    border: solid black 1px;
-    text-align: center;
-    height: 40px;
+    width: 120px;
 }
 
 .platformCell { /* Was made because of the scroll bar */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: table-cell;
     width: 73.5px;
-    border: solid black 1px;
-    text-align: center;
-    height: 40px;
 }
