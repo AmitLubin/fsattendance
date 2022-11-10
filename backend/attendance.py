@@ -7,7 +7,6 @@ import csv
 import mysql.connector # mysql requires installation
 from mysql.connector import Error
 from dotenv import load_dotenv # dotenv requires installation
-from pathlib import Path
 
 def get_files(dirpath):
     """
@@ -29,7 +28,6 @@ def get_files(dirpath):
 
 def init_sql():
     
-    #envpath = Path('../environmentals/.env') #use when not in docker image
     load_dotenv()
     
     mysql_user = os.getenv("MYSQL_USER")
@@ -289,14 +287,18 @@ def print_full_attendance(cursor):
     res = cursor.fetchall()
     print(res)
 
-def get_table(cursor):
-    cursor.execute(" SELECT * FROM attendance; ")
-    return cursor.fetchall()
-    
 def disable_connection(connection, cursor):
     cursor.close()
     connection.close()
     return 0
+
+def get_table(cursor):
+    cursor.execute(" SELECT * FROM attendance; ")
+    return cursor.fetchall()
+
+def get_table_specific(cursor, specifics):
+    cursor.execute(f" SELECT {specifics} FROM attendance; ")
+    return cursor.fetchall()
 
 def post_csv(dirpath):
     """
@@ -327,6 +329,17 @@ def get_api():
     results = get_table(cursor)
     disable_connection(connection, cursor)
     return results
+
+def get_category_api(specifics):
+    connection, cursor = init_sql()
+    try:
+        results = get_table_specific(cursor, specifics)
+    except:
+        results = "<h1>problem with request, check specs</h1>"
+    finally:
+        disable_connection(connection, cursor)
+        return results
+    
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
