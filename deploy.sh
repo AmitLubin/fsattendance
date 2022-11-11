@@ -24,10 +24,12 @@ ssh $machine <<'EOF'
 	exit
 EOF
 # if deploying to test move tests directory to test machine and run tests:
-if [ $machine == "test" ]; then
-	ssh test <<-EOF
-		cd final-project/tests/
-		bash test-back.sh
-		bash test-front.sh
-		exit
-	EOF
+if [ $machine == "prod" ]; then
+	exit 0
+fi
+ssh test <<'EOF'
+	cd final-project/tests/
+	bash test-back.sh
+	bash test-front.sh
+	exit
+EOF
