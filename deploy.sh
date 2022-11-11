@@ -27,7 +27,7 @@ EOF
 if [ $machine == "prod" ]; then
 	exit 0
 fi
-ssh test <<'EOF'
+ssh test <<-EOF
 	cd final-project/tests/
 	bash test-back.sh
 	bash test-front.sh
