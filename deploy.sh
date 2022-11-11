@@ -22,7 +22,7 @@ ssh $machine << EOF
 	docker-compose up -d
 	sleep(20)
 	exit
-EOF`
+EOF
 # if deploying to test move tests directory to test machine and run tests:
 if [ $machine == "prod" ]; then
 	exit 0
