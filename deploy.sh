@@ -18,6 +18,7 @@ rsync -zrv --delete /var/lib/jenkins/workspace/attendance-project/ $machine:/hom
 # connecting to the input machine and running multiple commands:
 ssh $machine << EOF
 	cd final-project/
+	bash docker-clean.sh
 	docker-compose up -d
 	sleep(20) 
 EOF
