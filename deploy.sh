@@ -20,13 +20,14 @@ ssh $machine << 'EOF'
 	cd final-project/
 	bash docker-clean.sh
 	docker-compose up -d
-	sleep(20) 
-'EOF'
+	sleep(20)
+	exit
+EOF
 # if deploying to test move tests directory to test machine and run tests:
 if [ $machine == "test" ]; then
 	ssh test << 'EOF'
 		cd final-project/tests/
 		bash test-back.sh
 		bash test-front.sh
-	'EOF'
+	EOF
 fi
