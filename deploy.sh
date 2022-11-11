@@ -29,5 +29,6 @@ if [ $machine == "test" ]; then
 		cd final-project/tests/
 		bash test-back.sh
 		bash test-front.sh
-	EOF
+		exit
+EOF
 fi
