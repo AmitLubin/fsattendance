@@ -27,21 +27,21 @@ pipeline {
                 }
             }
         }
-		stage('Clean up') {
+		stage('Clean') {
 			steps {
 				sh "docker rmi $registry:$BUILD_NUMBER"
 			}
 		}
 		stage('Test') {
 			steps {
-				sh """cd ~/final-project/
-				bash deploy.sh test"""
+				sh """cd /var/lib/jenkins/workspace/attendance-project/
+				    bash deploy.sh test""".trim()
 			}
 		}
 		stage('Prod') {
 			steps {
-				sh """cd ~/final-project/
-				bash deploy.sh prod"""
+				sh """cd /var/lib/jenkins/workspace/attendance-project/
+				    bash deploy.sh prod""".trim()
 			}
 		}	
     }
