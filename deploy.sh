@@ -25,10 +25,10 @@ ssh $machine <<'EOF'
 EOF
 # if deploying to test move tests directory to test machine and run tests:
 if [ $machine == "test" ]; then
-	ssh test <<-EOF
+	ssh test <<-HERE
 		cd final-project/tests/
 		bash test-back.sh
 		bash test-front.sh
 		exit
-	EOF
+	HERE
 fi
