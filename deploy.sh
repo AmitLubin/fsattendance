@@ -15,12 +15,13 @@ fi
 echo "deploying to ${machine} machine..."
 # making sure final-project directory exists and copying to it all the files from the git repository:
 rsync -zrv --delete /var/lib/jenkins/workspace/attendance-project/ $machine:/home/ec2-user/final-project/
+rsync -zv /home/ec2-user/final-project/environmentals/.env $machine:/home/ec2-user/final-project/environmentals/
 # connecting to the input machine and running multiple commands:
 ssh $machine << EOF
 	cd final-project/
 	bash docker-clean.sh
 	docker-compose up -d
-	sleep(20)
+	sleep 20
 	exit
 EOF
 # if deploying to test move tests directory to test machine and run tests:
