@@ -1,18 +1,6 @@
-.topnav {
-    background-color: #333;
-    overflow: hidden;
+.menu-item {
+  float: left;
+  text-align: center;
+  background-color: #333;
+  height: 40px;
 }
-
-.topnav a {
-    float: left;
-    color: #f2f2f2;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
-  }
-
-  .topnav a:hover {
-    background-color: #ddd;
-    color: black;
-  }

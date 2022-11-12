@@ -296,8 +296,12 @@ def get_table(cursor):
     cursor.execute(" SELECT * FROM attendance; ")
     return cursor.fetchall()
 
-def get_table_specific(cursor, specifics):
-    cursor.execute(f" SELECT {specifics} FROM attendance; ")
+def get_table_by_category(cursor, categories):
+    cursor.execute(f" SELECT {categories} FROM attendance; ")
+    return cursor.fetchall()
+
+def get_table_specifics(cursor, categories, input_type, input_text):
+    cursor.execute(f" SELECT {categories} FROM attendance WHERE {input_type} = '{input_text}'; ")
     return cursor.fetchall()
 
 def post_csv(dirpath):
@@ -326,20 +330,33 @@ def post_api(path):
 
 def get_api():
     connection, cursor = init_sql()
-    results = get_table(cursor)
-    disable_connection(connection, cursor)
-    return results
+    try:
+        results = get_table(cursor)
+    except:
+        results = "<h1>problem with request</h1>"
+    finally:
+        disable_connection(connection, cursor)
+        return results
 
-def get_category_api(specifics):
+def get_category_api(categories):
     connection, cursor = init_sql()
     try:
-        results = get_table_specific(cursor, specifics)
+        results = get_table_by_category(cursor, categories)
     except:
-        results = "<h1>problem with request, check specs</h1>"
+        results = "<h1>problem with request</h1>"
     finally:
         disable_connection(connection, cursor)
         return results
     
+def get_specific_api(categories, input_type, input_text):
+    connection, cursor = init_sql()
+    try:
+        results = get_table_specifics(cursor, categories, input_type, input_text)
+    except:
+        results = "<h1>problem with request</h1>"
+    finally:
+        disable_connection(connection, cursor)
+        return results    
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
