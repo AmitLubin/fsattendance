@@ -15,7 +15,7 @@ fi
 echo "deploying to ${machine} machine..."
 # making sure final-project directory exists and copying to it all the files from the git repository:
 rsync -zrv --delete /var/lib/jenkins/workspace/attendance-project/ $machine:/home/ec2-user/final-project/
-rsync -zv /home/ec2-user/final-project/environmentals/ $machine:/home/ec2-user/environmentals/
+rsync -zv /home/ec2-user/final-project/environmentals/* $machine:/home/ec2-user/environmentals/
 # connecting to the input machine and running multiple commands:
 ssh $machine << EOF
 	cd final-project/
