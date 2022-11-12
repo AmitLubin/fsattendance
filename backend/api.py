@@ -1,7 +1,9 @@
 from flask import Flask, request # flask requires installation
 from flask_cors import CORS
 from attendance import post_api, get_api, get_category_api, get_specific_api
+from dotenv import load_dotenv
 import json
+import os
 
 app = Flask(__name__)
 CORS(app) #needed to be removed once all is dockerized
@@ -22,12 +24,10 @@ def get_mysql():
 
 @app.route('/', methods=['POST'])
 def insert_csv():
-    folder = str(request.get_data())
-    print(folder)
-    print(request.get_data())
-    if folder[0] == 'b': 
-        folder = folder.rsplit('b')[1]
-    folder = folder.replace("'", "")
+    load_dotenv()
+    source_ssh = os.getenv("SSH_ADDRESS")
+    os.system(f'scp -i .ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {source_ssh} ./csv_files/')
+    folder = './csv_files/'
     return post_api(folder)
 
 @app.route('/category', methods=['GET'])
