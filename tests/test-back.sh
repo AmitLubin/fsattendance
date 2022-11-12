@@ -2,7 +2,7 @@
 
 echo "Running test on backend..."
 url=localhost:5000
-code=`curl -s -I ${url} | grep HTTP | awk '{print $2}'`
+code=$(curl -s -I ${url} | grep HTTP | awk '{print $2}')
 if [ code -eq 200 ]; then
     echo "Test passed!"
 else
