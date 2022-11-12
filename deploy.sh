@@ -7,7 +7,7 @@ if [ "$#" -ne 1 ]; then
 fi
 # check input spelling:
 machine=$1
-if [ $machine != "test" ] || [ $machine != "prod" ]; then
+if [ $machine != "test" ] && [ $machine != "prod" ]; then
 	echo -e "Enter the input correctly: test or prod\nUsage: ${0} [test|prod]" >&2
 	exit 1
 fi
