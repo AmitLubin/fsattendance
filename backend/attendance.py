@@ -194,13 +194,13 @@ def sql_arrange(time_dict, cursor, max_time):
     OVERALL_TIME = 7
     PLATFORM = 8
     
-    cursor.execute('SELECT * FROM temp ORDER BY join_time ASC')
+    cursor.execute(" SELECT * FROM temp ORDER BY join_time ASC; ")
     tempList = cursor.fetchall()
+    
     for line in tempList:
         
         if "bynet" in line[EMAIL] or "8200" in line[EMAIL] or "nan" in line[EMAIL] or '' == line[EMAIL]: 
             continue
-        
         username = line[EMAIL].rsplit('@')[0]
         fix =  check_spell(username, time_dict)
         if not fix:
@@ -234,9 +234,11 @@ def sql_arrange(time_dict, cursor, max_time):
 def print_time_dict(time_dict):
     for user in time_dict.keys():
         print(time_dict[user])            
-
+    
 def insert_dict(time_dict, cursor, connection): 
-    create_attendance_table = """CREATE TABLE IF NOT EXISTS attendance(
+    for user in time_dict.keys():
+        
+        create_attendance_table = """CREATE TABLE IF NOT EXISTS attendance(
             room_name varchar(50) NOT NULL,
             room_start varchar(30) NOT NULL,
             room_finish varchar(30) NOT NULL,
@@ -248,9 +250,8 @@ def insert_dict(time_dict, cursor, connection):
             PRIMARY KEY(room_name, room_start, email)
         )"""
     
-    #cursor.execute(" DROP TABLE IF EXISTS attendance; ") #need to disable laters
-    cursor.execute(create_attendance_table)
-    for user in time_dict.keys():
+        #cursor.execute(" DROP TABLE IF EXISTS attendance; ") #need to disable later
+        cursor.execute(create_attendance_table)
         
         insertOrUpdateQuery = """
             INSERT INTO attendance (
@@ -292,6 +293,30 @@ def disable_connection(connection, cursor):
     connection.close()
     return 0
 
+def sum_of_days(days):
+    sum_days = 0
+    for day in days:
+        start_hours = int(day[0].rsplit(" ")[1].rsplit(":")[0])
+        start_minutes = int(day[0].rsplit(" ")[1].rsplit(":")[1])
+        end_hours = int(day[1].rsplit(" ")[1].rsplit(":")[0])
+        end_minutes = int(day[1].rsplit(" ")[1].rsplit(":")[1])
+        sum_days += (end_hours - start_hours)*60 + end_minutes - start_minutes
+        print(sum_days)
+    return sum_days
+
+def get_average(cursor, spec_input):
+    sum_user = 0
+    cursor.execute(f" SELECT email,overall_time FROM attendance; ")
+    res = cursor.fetchall()
+    for i in range(len(res)):
+        if jellyfish.damerau_levenshtein_distance(spec_input, res[i][0]) < 3:
+            sum_user += int(res[i][1])
+    print(sum_user)
+    cursor.execute(" SELECT DISTINCT room_start,room_finish FROM attendance ORDER BY room_start; ")
+    days = cursor.fetchall()
+    sum_all_days = sum_of_days(days)
+    return (sum_user/sum_all_days)*100
+
 def get_table(cursor):
     cursor.execute(" SELECT * FROM attendance; ")
     return cursor.fetchall()
@@ -303,6 +328,13 @@ def get_table_by_category(cursor, categories):
 def get_table_specifics(cursor, categories, input_type, input_text):
     cursor.execute(f" SELECT {categories} FROM attendance WHERE {input_type} = '{input_text}'; ")
     return cursor.fetchall()
+
+def get_table_dynamic(cursor, categories, input_type, input_text):
+    cursor.execute(f" SELECT {categories} FROM attendance; ")
+    res = cursor.fetchall()
+    
+    return 0
+    
 
 def post_csv(dirpath):
     """
@@ -356,17 +388,21 @@ def get_specific_api(categories, input_type, input_text):
         results = "<h1>problem with request</h1>"
     finally:
         disable_connection(connection, cursor)
-        return results    
+        return results
+
+def get_avg_api(input_text):
+    connection, cursor = init_sql()
+    try:
+        results = get_average(cursor, input_text)
+    except:
+        results = "<h1>problem with request</h1>"
+    finally:
+        disable_connection(connection, cursor)
+        return results
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("must provide ONE path to a directory")
-        exit(1)
-    path = sys.argv[1]
-    if not os.path.isdir(path):
-        print("This path is not a directory")
-        exit(1)
     
-    post_csv(path)
+    #res = get_avg_api("orendin8@gmail.com")
+    res = get_api()
     
 

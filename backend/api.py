@@ -14,14 +14,6 @@ def category_checker(check):
         if req not in checker: return False
     return True
 
-@app.route('/', methods=['GET'])
-def get_mysql():
-    results = get_api() #return an array with lots of tuples inside, viewed as string arrays in html
-    if len(results[0]) == 0: return "<h1> no results! </h1>"
-    #resultsJSON = { "results": json.dumps(results)}
-    resultsJSON = json.dumps(results)
-    return resultsJSON
-
 @app.route('/', methods=['POST'])
 def insert_csv():
     load_dotenv()
@@ -30,12 +22,13 @@ def insert_csv():
     folder = './csv_files/'
     return post_api(folder)
 
-@app.route('/category', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_mysql_category():
     categories = request.args.get('categories')
-    
-    flag = category_checker(categories.split(","))
-    if not flag: return "<h1>Categories don't match </h1>"
+    if categories == None: categories="*"
+    else:
+        flag = category_checker(categories.split(","))
+        if not flag: return "<h1>Categories don't match </h1>"
     
     results = get_category_api(categories)
     if len(results[0]) == 0: return "<h1> no results! </h1>"
@@ -58,6 +51,10 @@ def get_mysql_specefic():
     #resultsJSON = { "results": json.dumps(results) } 
     resultsJSON = json.dumps(results)
     return resultsJSON
+
+@app.route('/average', methods=['GET'])
+def get_average():
+    input_text = request.args.get('input')
     
 
 if __name__ == '__main__':
