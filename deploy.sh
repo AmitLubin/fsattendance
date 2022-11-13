@@ -19,7 +19,7 @@ rsync -zrv --delete /var/lib/jenkins/workspace/attendance-project/ $machine:/hom
 ssh $machine << EOF
 	cd final-project/
 	bash docker-clean.sh
-	docker-compose -d --env-file ${env} up
+	docker-compose --env-file ${env} -d up
 	sleep 20
 	exit
 EOF
