@@ -424,7 +424,7 @@ def get_avg_api(input_text, dynamic):
 
 if __name__ == '__main__':
     
-    res = get_avg_api("orendin8@gmail.com", False)
+    res = get_api()
     print(res)
     
 
