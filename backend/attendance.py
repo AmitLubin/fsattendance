@@ -250,7 +250,6 @@ def insert_dict(time_dict, cursor, connection):
             PRIMARY KEY(room_name, room_start, email)
         )"""
     
-        #cursor.execute(" DROP TABLE IF EXISTS attendance; ") #need to disable later
         cursor.execute(create_attendance_table)
         
         insertOrUpdateQuery = """
@@ -293,28 +292,40 @@ def disable_connection(connection, cursor):
     connection.close()
     return 0
 
-def sum_of_days(days):
+def sum_of_days(cursor):
+    cursor.execute(" SELECT DISTINCT room_start,room_finish FROM attendance ORDER BY room_start; ")
+    days = cursor.fetchall()
     sum_days = 0
+    
     for day in days:
         start_hours = int(day[0].rsplit(" ")[1].rsplit(":")[0])
         start_minutes = int(day[0].rsplit(" ")[1].rsplit(":")[1])
         end_hours = int(day[1].rsplit(" ")[1].rsplit(":")[0])
         end_minutes = int(day[1].rsplit(" ")[1].rsplit(":")[1])
         sum_days += (end_hours - start_hours)*60 + end_minutes - start_minutes
-        print(sum_days)
     return sum_days
 
-def get_average(cursor, spec_input):
+def get_average_specific(cursor, text_input):
     sum_user = 0
-    cursor.execute(f" SELECT email,overall_time FROM attendance; ")
+    cursor.execute(f" SELECT overall_time FROM attendance WHERE email = '{text_input}'; ")
     res = cursor.fetchall()
-    for i in range(len(res)):
-        if jellyfish.damerau_levenshtein_distance(spec_input, res[i][0]) < 3:
-            sum_user += int(res[i][1])
-    print(sum_user)
-    cursor.execute(" SELECT DISTINCT room_start,room_finish FROM attendance ORDER BY room_start; ")
-    days = cursor.fetchall()
-    sum_all_days = sum_of_days(days)
+    
+    for i in res:
+        sum_user += int(i[0])
+    
+    sum_all_days = sum_of_days(cursor)
+    return (sum_user/sum_all_days)*100
+
+def get_average_dynamic(cursor, text_input):
+    sum_user = 0
+    cursor.execute(" SELECT email,overall_time FROM attendance; ")
+    res = cursor.fetchall()
+    
+    for i in res:
+        if jellyfish.damerau_levenshtein_distance(text_input, i[0]) < 3:
+            sum_user += int(i[1])
+    
+    sum_all_days = sum_of_days(cursor)
     return (sum_user/sum_all_days)*100
 
 def get_table(cursor):
@@ -350,16 +361,17 @@ def post_csv(dirpath):
     and the initiative pd.DataFrame
     :return: pd.DataFrame, list of csv files and the dictionary of the participants
     """
+    
+    """
+    helpful functions can be used to debug: print_full_attendance(cursor), print_time_dict(time_dict), get_table(cursor)
+    """
     csv_lst = get_files(dirpath)
     connection, cursor = init_sql()
     for i in range(len(csv_lst)):
         time_dict = {}
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
-        #print_time_dict(time_dict)
         insert_dict(time_dict, cursor, connection)
-    #get_full_attendance(cursor)
-    #results = get_table(cursor)
     disable_connection(connection, cursor)
 
 def post_api(path):
@@ -399,10 +411,11 @@ def get_specific_api(categories, input_type, input_text, dynamic):
         disable_connection(connection, cursor)
         return results
 
-def get_avg_api(input_text):
+def get_avg_api(input_text, dynamic):
     connection, cursor = init_sql()
     try:
-        results = get_average(cursor, input_text)
+        if dynamic: results = get_average_dynamic(cursor, input_text)
+        else: results = get_average_specific(cursor, input_text)
     except:
         results = "<h1>problem with request</h1>"
     finally:
@@ -411,8 +424,7 @@ def get_avg_api(input_text):
 
 if __name__ == '__main__':
     
-    #res = get_avg_api("orendin8@gmail.com")
-    res = get_specific_api("name,email", "email", "orendin8@gmail.com", True)
+    res = get_avg_api("orendin8@gmail.com", False)
     print(res)
     
 
