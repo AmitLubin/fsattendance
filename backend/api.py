@@ -1,6 +1,6 @@
 from flask import Flask, request # flask requires installation
 from flask_cors import CORS
-from attendance import post_api, get_api, get_category_api, get_specific_api
+from attendance import post_api, get_category_api, get_specific_api
 from dotenv import load_dotenv
 import json
 import os
@@ -46,7 +46,7 @@ def get_mysql_specefic():
         flag = category_checker(categories.split(","))
         if not flag: return "<h1>Categories don't match</h1>"
     
-    results = get_specific_api(categories, input_type, input_text)
+    results = get_specific_api(categories, input_type, input_text, False)
     if len(results[0]) == 0: return "<h1> no results! </h1>"
     #resultsJSON = { "results": json.dumps(results) } 
     resultsJSON = json.dumps(results)

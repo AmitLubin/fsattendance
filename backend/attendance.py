@@ -78,7 +78,7 @@ def get_data(csvread, cursor):
                 leave_time varchar(30) NOT NULL,
                 overall_time varchar(30) NOT NULL,
                 platform varchar(30) NOT NULL  
-            ) """
+        ) """
         
         cursor.execute(" DROP TABLE IF EXISTS temp; ") 
         cursor.execute(mysql_Create_Table)
@@ -332,8 +332,16 @@ def get_table_specifics(cursor, categories, input_type, input_text):
 def get_table_dynamic(cursor, categories, input_type, input_text):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
     res = cursor.fetchall()
+    cursor.execute(f" SELECT {input_type} FROM attendance ")
+    search_by = cursor.fetchall()
+    i = 0
+    for search_result in search_by:
+        if not (jellyfish.damerau_levenshtein_distance(search_result[0], input_text) < 3):
+            del res[i]
+        else:
+            i += 1
     
-    return 0
+    return res
     
 
 def post_csv(dirpath):
@@ -380,10 +388,11 @@ def get_category_api(categories):
         disable_connection(connection, cursor)
         return results
     
-def get_specific_api(categories, input_type, input_text):
+def get_specific_api(categories, input_type, input_text, dynamic):
     connection, cursor = init_sql()
     try:
-        results = get_table_specifics(cursor, categories, input_type, input_text)
+        if dynamic: results = get_table_dynamic(cursor, categories, input_type, input_text)
+        else: results = get_table_specifics(cursor, categories, input_type, input_text)
     except:
         results = "<h1>problem with request</h1>"
     finally:
@@ -403,6 +412,7 @@ def get_avg_api(input_text):
 if __name__ == '__main__':
     
     #res = get_avg_api("orendin8@gmail.com")
-    res = get_api()
+    res = get_specific_api("name,email", "email", "orendin8@gmail.com", True)
+    print(res)
     
 
