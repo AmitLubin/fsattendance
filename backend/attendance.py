@@ -374,18 +374,18 @@ def post_csv(dirpath):
         insert_dict(time_dict, cursor, connection)
     disable_connection(connection, cursor)
 
-def post_api(path):
-    if not os.path.isdir(path):
-        return "<h1>Not a directory</h1>"
-    post_csv(path)
-    return "<h1> Done! </h1>"
+def post_api(dir):
+    if not os.path.isdir(dir):
+        return 'Not a Directory!'
+    post_csv(dir)
+    return 'Done!'
 
 def get_api():
     connection, cursor = init_sql()
     try:
         results = get_table(cursor)
     except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results
@@ -395,7 +395,7 @@ def get_category_api(categories):
     try:
         results = get_table_by_category(cursor, categories)
     except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results
@@ -406,7 +406,7 @@ def get_specific_api(categories, input_type, input_text, dynamic):
         if dynamic: results = get_table_dynamic(cursor, categories, input_type, input_text)
         else: results = get_table_specifics(cursor, categories, input_type, input_text)
     except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results
@@ -417,7 +417,7 @@ def get_avg_api(input_text, dynamic):
         if dynamic: results = get_average_dynamic(cursor, input_text)
         else: results = get_average_specific(cursor, input_text)
     except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results

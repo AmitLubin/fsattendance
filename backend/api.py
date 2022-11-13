@@ -21,22 +21,30 @@ def category_checker(categories):
         if not flag: return False
     return categories
     
+#POST actions
 
 @app.route('/', methods=['POST'])
 def insert_csv():
     load_dotenv()
     source_ssh = os.getenv("SSH_ADDRESS")
     os.system(f'scp -i .ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {source_ssh} ./csv_files/')
-    folder = './csv_files/'
-    return post_api(folder)
+    folder = 'csv_files/'
+    results = post_api(folder)
+    if results == 'Done!': return {
+        "results": results,
+        "status_code": 200
+    }
+    return {
+        "results": results,
+        "status_code": 404
+    }
+
+#Testing GET actions
 
 @app.route('/raw', methods=['GET'])
 def get_raw_info():
     categories = category_checker(request.args.get('categories'))
-    if not categories: return {
-        "results": "<h1>Categories don't match</h1>",
-        "status_code": 404
-    }
+    if not categories: "<h1>Categories don't match</h1>"
     
     results = get_category_api(categories)
     if len(results[0]) == 0: return "<h1> no results! </h1>"
@@ -47,10 +55,7 @@ def get_raw_spec_info():
     input_type = request.args.get('type')
     input_text = request.args.get('input')
     categories = category_checker(request.args.get('categories'))
-    if not categories: return {
-        "results": "<h1>Categories don't match</h1>",
-        "status_code": 404
-    }
+    if not categories: return "<h1>Categories don't match</h1>"
     dynamic = request.args.get('dynamic')
     if dynamic == None: dynamic = False
     
@@ -67,23 +72,34 @@ def get_raw_avg():
     
     results = get_avg_api(input_text, dynamic)
     if results == 0: return "<h1> Something went wrong! </h1>"
-    return results
+    return [(results)]
+
+###
+#Frontend intended GET actions
+###
 
 @app.route('/', methods=['GET'])
 def get_mysql_category():
     categories = category_checker(request.args.get('categories'))
     if not categories: return {
-        "results": "<h1>Categories don't match</h1>",
+        "results": "Categories don't match",
         "status_code": 404
     }
     
     results = get_category_api(categories)
-    if len(results[0]) == 0: return "<h1> no results! </h1>"
-    resultsJSON = {
-        "results": json.dumps(results),
-        "status_code": 200
+    if results == 'problem with request': return {
+        "results": results,
+        "status_code": 404
     }
-    return resultsJSON
+    elif len(results[0]) == 0: return {
+        "results": "No results",
+        "status_code": 204
+    }
+    return {
+        "results": json.dumps(results),
+        "status_code": 200,
+        "results_count": len(results)
+    }
 
 @app.route('/specific', methods=['GET'])
 def get_mysql_specefic():
@@ -91,7 +107,7 @@ def get_mysql_specefic():
     input_text = request.args.get('input')
     categories = category_checker(request.args.get('categories'))
     if not categories: return {
-        "results": "<h1>Categories don't match</h1>",
+        "results": "Categories don't match",
         "status_code": 404
     }
     dynamic = request.args.get('dynamic')
@@ -99,12 +115,19 @@ def get_mysql_specefic():
     else: dynamic = True
     
     results = get_specific_api(categories, input_type, input_text, dynamic)
-    if len(results[0]) == 0: return "<h1> no results! </h1>"
-    resultsJSON = {
-        "results": json.dumps(results),
-        "status_code": 200
+    if results == 'problem with request': return {
+        "results": results,
+        "status_code": 404
     }
-    return resultsJSON
+    elif len(results[0]) == 0: return {
+        "results": "No results",
+        "status_code": 204
+    }
+    return {
+        "results": json.dumps(results),
+        "status_code": 200,
+        "results_count": len(results)
+    }
     
 @app.route('/average', methods=['GET'])
 def get_average():
@@ -114,12 +137,18 @@ def get_average():
     else: dynamic = True
     
     results = get_avg_api(input_text, dynamic)
-    if results == 0: return "<h1> Something went wrong! </h1>"
-    resultsJSON = {
+    if results == 'problem with request': return {
+        "results": results,
+        "status_code": 404
+    }
+    elif results == 0: return {
+        "error": "Something went wrong",
+        "status_code": 404
+    }
+    return {
         "results": results,
         "status_code": 200
     }
-    return resultsJSON
     
 
 if __name__ == '__main__':
