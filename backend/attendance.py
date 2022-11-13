@@ -328,11 +328,7 @@ def get_average_dynamic(cursor, text_input):
     sum_all_days = sum_of_days(cursor)
     return (sum_user/sum_all_days)*100
 
-def get_table(cursor):
-    cursor.execute(" SELECT * FROM attendance; ")
-    return cursor.fetchall()
-
-def get_table_by_category(cursor, categories):
+def get_table(cursor, categories):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
     return cursor.fetchall()
 
@@ -380,20 +376,10 @@ def post_api(dir):
     post_csv(dir)
     return 'Done!'
 
-def get_api():
+def get_api(categories):
     connection, cursor = init_sql()
     try:
-        results = get_table(cursor)
-    except:
-        results = 'problem with request'
-    finally:
-        disable_connection(connection, cursor)
-        return results
-
-def get_category_api(categories):
-    connection, cursor = init_sql()
-    try:
-        results = get_table_by_category(cursor, categories)
+        results = get_table(cursor, categories)
     except:
         results = 'problem with request'
     finally:
@@ -421,10 +407,4 @@ def get_avg_api(input_text, dynamic):
     finally:
         disable_connection(connection, cursor)
         return results
-
-if __name__ == '__main__':
-    
-    res = get_api()
-    print(res)
-    
 

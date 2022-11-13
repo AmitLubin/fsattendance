@@ -1,6 +1,6 @@
 from flask import Flask, request # flask requires installation
 from flask_cors import CORS
-from attendance import post_api, get_category_api, get_specific_api, get_avg_api
+from attendance import post_api, get_api, get_specific_api, get_avg_api
 from dotenv import load_dotenv
 import json
 import os
@@ -47,7 +47,7 @@ def get_mysql_category():
         "status_code": 404
     }
     
-    results = get_category_api(categories)
+    results = get_api(categories)
     if results == 'problem with request': return {
         "results": results,
         "status_code": 404
