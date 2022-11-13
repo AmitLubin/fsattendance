@@ -34,14 +34,18 @@ pipeline {
 		}
 		stage('Test') {
 			steps {
-				sh """cd /var/lib/jenkins/workspace/attendance-project/
-				    bash deploy.sh test""".trim()
+                withCredentials([file(credentialsId: 'dotenv', variable: 'env')]) {
+                    sh """cd /var/lib/jenkins/workspace/attendance-project/
+                        bash deploy.sh test""".trim()
+                }
 			}
 		}
 		stage('Prod') {
 			steps {
-				sh """cd /var/lib/jenkins/workspace/attendance-project/
-				    bash deploy.sh prod""".trim()
+                withCredentials([file(credentialsId: 'dotenv', variable: 'env')]) {
+                    sh """cd /var/lib/jenkins/workspace/attendance-project/
+                        bash deploy.sh prod""".trim()
+                }
 			}
 		}	
     }
