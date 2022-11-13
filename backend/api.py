@@ -21,7 +21,7 @@ def category_checker(categories):
         if not flag: return False
     return categories
     
-#POST actions
+#HTTP actions
 
 @app.route('/', methods=['POST'])
 def insert_csv():
@@ -38,45 +38,6 @@ def insert_csv():
         "results": results,
         "status_code": 404
     }
-
-#Testing GET actions
-
-@app.route('/raw', methods=['GET'])
-def get_raw_info():
-    categories = category_checker(request.args.get('categories'))
-    if not categories: "<h1>Categories don't match</h1>"
-    
-    results = get_category_api(categories)
-    if len(results[0]) == 0: return "<h1> no results! </h1>"
-    return results
-
-@app.route('/rawspec', methods=['GET'])
-def get_raw_spec_info():
-    input_type = request.args.get('type')
-    input_text = request.args.get('input')
-    categories = category_checker(request.args.get('categories'))
-    if not categories: return "<h1>Categories don't match</h1>"
-    dynamic = request.args.get('dynamic')
-    if dynamic == None: dynamic = False
-    
-    results = get_specific_api(categories, input_type, input_text, dynamic)
-    if len(results[0]) == 0: return "<h1> no results! </h1>"
-    return results
-
-@app.route('/rawavg', methods=['GET'])
-def get_raw_avg():
-    input_text = request.args.get('input')
-    dynamic = request.args.get('dynamic')
-    if dynamic == None: dynamic = False
-    else: dynamic = True
-    
-    results = get_avg_api(input_text, dynamic)
-    if results == 0: return "<h1> Something went wrong! </h1>"
-    return [(results)]
-
-###
-#Frontend intended GET actions
-###
 
 @app.route('/', methods=['GET'])
 def get_mysql_category():
