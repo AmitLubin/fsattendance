@@ -34,7 +34,7 @@ pipeline {
 		}
 		stage('Test') {
 			steps {
-                withCredentials([file(credentialsId: 'dotenv', variable: 'env')]) {
+                withCredentials([file(credentialsId: '.env', variable: 'env')]) {
                     sh """cd /var/lib/jenkins/workspace/attendance-project/
                         bash deploy.sh test""".trim()
                 }
@@ -42,7 +42,7 @@ pipeline {
 		}
 		stage('Prod') {
 			steps {
-                withCredentials([file(credentialsId: 'dotenv', variable: 'env')]) {
+                withCredentials([file(credentialsId: '.env', variable: 'env')]) {
                     sh """cd /var/lib/jenkins/workspace/attendance-project/
                         bash deploy.sh prod""".trim()
                 }
