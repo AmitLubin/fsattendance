@@ -19,7 +19,8 @@ rsync -zrv --delete /var/lib/jenkins/workspace/attendance-project/ $machine:/hom
 ssh -T $machine << EOF
 	cd final-project/
 	bash docker-clean.sh
-	docker-compose --env-file /var/lib/jenkins/secrets/dotenv up -d
+	export DOTENV=${env}
+	docker-compose up -d
 	sleep 20
 EOF
 # if deploying to test move tests directory to test machine and run tests:

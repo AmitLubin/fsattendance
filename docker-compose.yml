@@ -5,6 +5,8 @@ services:
     ports: 
       - "5000:5000"
     restart: always
+    environment:
+      - DOTENV
 #    env_file:
 #      - environmentals/.env
     depends_on:
@@ -12,5 +14,7 @@ services:
   
   mysql:
     image: 'mysql:latest'
+    environment:
+      - DOTENV
 #    env_file:
 #      - environmentals/.env
