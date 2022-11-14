@@ -78,7 +78,7 @@ def get_data(csvread, cursor):
                 leave_time varchar(30) NOT NULL,
                 overall_time varchar(30) NOT NULL,
                 platform varchar(30) NOT NULL  
-            ) """
+        ) """
         
         cursor.execute(" DROP TABLE IF EXISTS temp; ") 
         cursor.execute(mysql_Create_Table)
@@ -250,7 +250,6 @@ def insert_dict(time_dict, cursor, connection):
             PRIMARY KEY(room_name, room_start, email)
         )"""
     
-        #cursor.execute(" DROP TABLE IF EXISTS attendance; ") #need to disable later
         cursor.execute(create_attendance_table)
         
         insertOrUpdateQuery = """
@@ -293,35 +292,43 @@ def disable_connection(connection, cursor):
     connection.close()
     return 0
 
-def sum_of_days(days):
+def sum_of_days(cursor):
+    cursor.execute(" SELECT DISTINCT room_start,room_finish FROM attendance ORDER BY room_start; ")
+    days = cursor.fetchall()
     sum_days = 0
+    
     for day in days:
         start_hours = int(day[0].rsplit(" ")[1].rsplit(":")[0])
         start_minutes = int(day[0].rsplit(" ")[1].rsplit(":")[1])
         end_hours = int(day[1].rsplit(" ")[1].rsplit(":")[0])
         end_minutes = int(day[1].rsplit(" ")[1].rsplit(":")[1])
         sum_days += (end_hours - start_hours)*60 + end_minutes - start_minutes
-        print(sum_days)
     return sum_days
 
-def get_average(cursor, spec_input):
+def get_average_specific(cursor, text_input):
     sum_user = 0
-    cursor.execute(f" SELECT email,overall_time FROM attendance; ")
+    cursor.execute(f" SELECT overall_time FROM attendance WHERE email = '{text_input}'; ")
     res = cursor.fetchall()
-    for i in range(len(res)):
-        if jellyfish.damerau_levenshtein_distance(spec_input, res[i][0]) < 3:
-            sum_user += int(res[i][1])
-    print(sum_user)
-    cursor.execute(" SELECT DISTINCT room_start,room_finish FROM attendance ORDER BY room_start; ")
-    days = cursor.fetchall()
-    sum_all_days = sum_of_days(days)
+    
+    for i in res:
+        sum_user += int(i[0])
+    
+    sum_all_days = sum_of_days(cursor)
     return (sum_user/sum_all_days)*100
 
-def get_table(cursor):
-    cursor.execute(" SELECT * FROM attendance; ")
-    return cursor.fetchall()
+def get_average_dynamic(cursor, text_input):
+    sum_user = 0
+    cursor.execute(" SELECT email,overall_time FROM attendance; ")
+    res = cursor.fetchall()
+    
+    for i in res:
+        if jellyfish.damerau_levenshtein_distance(text_input, i[0]) < 3:
+            sum_user += int(i[1])
+    
+    sum_all_days = sum_of_days(cursor)
+    return (sum_user/sum_all_days)*100
 
-def get_table_by_category(cursor, categories):
+def get_table(cursor, categories):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
     return cursor.fetchall()
 
@@ -332,8 +339,16 @@ def get_table_specifics(cursor, categories, input_type, input_text):
 def get_table_dynamic(cursor, categories, input_type, input_text):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
     res = cursor.fetchall()
+    cursor.execute(f" SELECT {input_type} FROM attendance ")
+    search_by = cursor.fetchall()
+    i = 0
+    for search_result in search_by:
+        if not (jellyfish.damerau_levenshtein_distance(search_result[0], input_text) < 3):
+            del res[i]
+        else:
+            i += 1
     
-    return 0
+    return res
     
 
 def post_csv(dirpath):
@@ -342,67 +357,54 @@ def post_csv(dirpath):
     and the initiative pd.DataFrame
     :return: pd.DataFrame, list of csv files and the dictionary of the participants
     """
+    
+    """
+    helpful functions can be used to debug: print_full_attendance(cursor), print_time_dict(time_dict), get_table(cursor)
+    """
     csv_lst = get_files(dirpath)
     connection, cursor = init_sql()
     for i in range(len(csv_lst)):
         time_dict = {}
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
-        #print_time_dict(time_dict)
         insert_dict(time_dict, cursor, connection)
-    #get_full_attendance(cursor)
-    #results = get_table(cursor)
     disable_connection(connection, cursor)
 
-def post_api(path):
-    if not os.path.isdir(path):
-        return "<h1>Not a directory</h1>"
-    post_csv(path)
-    return "<h1> Done! </h1>"
+def post_api(dir):
+    if not os.path.isdir(dir):
+        return 'Not a Directory!'
+    post_csv(dir)
+    return 'Done!'
 
-def get_api():
+def get_api(categories):
     connection, cursor = init_sql()
     try:
-        results = get_table(cursor)
+        results = get_table(cursor, categories)
     except:
-        results = "<h1>problem with request</h1>"
-    finally:
-        disable_connection(connection, cursor)
-        return results
-
-def get_category_api(categories):
-    connection, cursor = init_sql()
-    try:
-        results = get_table_by_category(cursor, categories)
-    except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results
     
-def get_specific_api(categories, input_type, input_text):
+def get_specific_api(categories, input_type, input_text, dynamic):
     connection, cursor = init_sql()
     try:
-        results = get_table_specifics(cursor, categories, input_type, input_text)
+        if dynamic: results = get_table_dynamic(cursor, categories, input_type, input_text)
+        else: results = get_table_specifics(cursor, categories, input_type, input_text)
     except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results
 
-def get_avg_api(input_text):
+def get_avg_api(input_text, dynamic):
     connection, cursor = init_sql()
     try:
-        results = get_average(cursor, input_text)
+        if dynamic: results = get_average_dynamic(cursor, input_text)
+        else: results = get_average_specific(cursor, input_text)
     except:
-        results = "<h1>problem with request</h1>"
+        results = 'problem with request'
     finally:
         disable_connection(connection, cursor)
         return results
-
-if __name__ == '__main__':
-    
-    #res = get_avg_api("orendin8@gmail.com")
-    res = get_api()
-    
 
