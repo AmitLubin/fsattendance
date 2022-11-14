@@ -3,6 +3,10 @@
 # stop the containers:
 docker-compose down
 # delete all containers:
-docker rm -f $(docker ps -a -q)
+if [[ -n $(docker ps -a -q) ]]; then
+    docker rm -f $(docker ps -a -q)
+fi
 # delete all volumes:
-docker volume rm $(docker volume ls -q)
+if [[ -n $(docker volume ls -q) ]]; then
+    docker volume rm $(docker volume ls -q)
+fi
