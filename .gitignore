@@ -2,3 +2,4 @@
 **/*pycache*/
 **/*.ssh/
 **/*csv*files/
+**/dc.yml
