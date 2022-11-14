@@ -5,8 +5,8 @@ services:
     ports: 
       - "5000:5000"
     restart: always
-    env_file:
-      - environmentals/.env
+#    env_file:
+#      - environmentals/.env
     depends_on:
       - mysql
   
