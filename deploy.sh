@@ -20,7 +20,7 @@ ssh -T $machine << EOF
 	cd final-project/
 	bash docker-clean.sh
 	export DOTENV=${env}
-	docker-compose up -d
+	docker-compose up -d -v
 	sleep 10
 EOF
 # if deploying to test move tests directory to test machine and run tests:
@@ -28,6 +28,6 @@ if [ $machine == "test" ]; then
 	ssh -T test <<-EOF
 	cd final-project/tests/
 	bash test-back.sh
-	bash test-front.sh
+	#bash test-front.sh
 	EOF
 fi
