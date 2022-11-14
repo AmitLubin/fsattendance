@@ -34,18 +34,14 @@ pipeline {
 		}
 		stage('Test') {
 			steps {
-                withCredentials([string(credentialsId: '.env', variable: 'env')]) {
-                    sh """cd /var/lib/jenkins/workspace/attendance-project/
-                        bash deploy.sh test""".trim()
-                }
+                sh """cd /var/lib/jenkins/workspace/attendance-project/
+                    bash deploy.sh test""".trim()
 			}
 		}
 		stage('Prod') {
 			steps {
-                withCredentials([string(credentialsId: '.env', variable: 'env')]) {
-                    sh """cd /var/lib/jenkins/workspace/attendance-project/
-                        bash deploy.sh prod""".trim()
-                }
+                sh """cd /var/lib/jenkins/workspace/attendance-project/
+                    bash deploy.sh prod""".trim()
 			}
 		}	
     }
