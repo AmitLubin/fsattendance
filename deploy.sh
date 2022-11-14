@@ -20,7 +20,7 @@ ssh -T $machine << EOF
 	cd final-project/
 	bash docker-clean.sh
 	export DOTENV=${env}
-	docker-compose up -d -v
+	docker-compose --verbose up -d
 	sleep 10
 EOF
 # if deploying to test move tests directory to test machine and run tests:
