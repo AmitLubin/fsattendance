@@ -12,5 +12,5 @@ services:
   
   mysql:
     image: 'mysql:latest'
-    env_file:
-      - environmentals/.env
+#    env_file:
+#      - environmentals/.env
