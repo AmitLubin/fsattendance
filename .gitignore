@@ -3,3 +3,4 @@
 **/*.ssh/
 **/*csv*files/
 **/dc.yml
+**/build-back.sh
