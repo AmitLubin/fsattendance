@@ -21,7 +21,7 @@ ssh -T $machine << EOF
 	bash docker-clean.sh
 	export DOTENV=${env}
 	docker-compose up -d
-	sleep 20
+	sleep 10
 EOF
 # if deploying to test move tests directory to test machine and run tests:
 if [ $machine == "test" ]; then
