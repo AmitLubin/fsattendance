@@ -54,6 +54,20 @@ def init_sql():
     
     cursor = connection.cursor()
     
+    create_attendance_table = """CREATE TABLE IF NOT EXISTS attendance(
+        room_name varchar(50) NOT NULL,
+        room_start varchar(30) NOT NULL,
+        room_finish varchar(30) NOT NULL,
+        name varchar(20) NOT NULL,
+        email varchar(30) NOT NULL,
+        time varchar(200) NOT NULL,
+        overall_time varchar(30) NOT NULL,
+        platform varchar(30) NOT NULL,
+        PRIMARY KEY(room_name, room_start, email)
+    )"""
+    
+    cursor.execute(create_attendance_table)
+    
     return connection, cursor
 
 def get_data(csvread, cursor):
@@ -237,20 +251,6 @@ def print_time_dict(time_dict):
     
 def insert_dict(time_dict, cursor, connection): 
     for user in time_dict.keys():
-        
-        create_attendance_table = """CREATE TABLE IF NOT EXISTS attendance(
-            room_name varchar(50) NOT NULL,
-            room_start varchar(30) NOT NULL,
-            room_finish varchar(30) NOT NULL,
-            name varchar(20) NOT NULL,
-            email varchar(30) NOT NULL,
-            time varchar(200) NOT NULL,
-            overall_time varchar(30) NOT NULL,
-            platform varchar(30) NOT NULL,
-            PRIMARY KEY(room_name, room_start, email)
-        )"""
-    
-        cursor.execute(create_attendance_table)
         
         insertOrUpdateQuery = """
             INSERT INTO attendance (
