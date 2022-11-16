@@ -33,7 +33,7 @@ def insert_csv():
     if results == 'Done!': return {
         "results": results,
         "status_code": 200
-    }
+    } 
     return {
         "results": results,
         "status_code": 404
@@ -48,11 +48,11 @@ def get_mysql_category():
     }
     
     results = get_api(categories)
-    if results == 'problem with request': return {
+    if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
         "status_code": 404
     }
-    elif len(results[0]) == 0: return {
+    elif len(results) == 0: return {
         "results": "No results",
         "status_code": 204
     }
@@ -76,11 +76,11 @@ def get_mysql_specefic():
     else: dynamic = True
     
     results = get_specific_api(categories, input_type, input_text, dynamic)
-    if results == 'problem with request': return {
+    if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
         "status_code": 404
     }
-    elif len(results[0]) == 0: return {
+    elif len(results) == 0: return {
         "results": "No results",
         "status_code": 204
     }
@@ -98,7 +98,7 @@ def get_average():
     else: dynamic = True
     
     results = get_avg_api(input_text, dynamic)
-    if results == 'problem with request': return {
+    if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
         "status_code": 404
     }

@@ -47,10 +47,12 @@ def init_sql():
             
     except Error as e:
         print('mysql error:', e)
-        if connection.is_connected():
+        try:
             connection.close()
             print('Connection terminated')
-            exit(1)
+        except:
+            print('Connection never established')
+        return None, None
     
     cursor = connection.cursor()
     
@@ -363,21 +365,25 @@ def post_csv(dirpath):
     """
     csv_lst = get_files(dirpath)
     connection, cursor = init_sql()
+    if connection == None: return "Bad connection to database"
     for i in range(len(csv_lst)):
         time_dict = {}
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
         insert_dict(time_dict, cursor, connection)
     disable_connection(connection, cursor)
+    return "good connection"
 
 def post_api(dir):
     if not os.path.isdir(dir):
         return 'Not a Directory!'
-    post_csv(dir)
+    check_connection = post_csv(dir)
+    if check_connection == "Bad connection to database": return check_connection
     return 'Done!'
 
 def get_api(categories):
     connection, cursor = init_sql()
+    if connection == None: return "Bad connection to database"
     try:
         results = get_table(cursor, categories)
     except:
@@ -388,6 +394,7 @@ def get_api(categories):
     
 def get_specific_api(categories, input_type, input_text, dynamic):
     connection, cursor = init_sql()
+    if connection == None: return "Bad connection to database"
     try:
         if dynamic: results = get_table_dynamic(cursor, categories, input_type, input_text)
         else: results = get_table_specifics(cursor, categories, input_type, input_text)
@@ -399,6 +406,7 @@ def get_specific_api(categories, input_type, input_text, dynamic):
 
 def get_avg_api(input_text, dynamic):
     connection, cursor = init_sql()
+    if connection == None: return "Bad connection to database"
     try:
         if dynamic: results = get_average_dynamic(cursor, input_text)
         else: results = get_average_specific(cursor, input_text)
