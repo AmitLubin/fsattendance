@@ -11,7 +11,7 @@ const TableLine = props => {
             <td className="mailCell">{props.data[4]}</td>
             <td className="cell">{props.data[5]}</td>
             <td className="cell">{props.data[6]} mins</td>
-            <td className="platformCell">{props.data[7]}</td>
+            <td className="cell">{props.data[7]}</td>
         </tr>
     );
 }

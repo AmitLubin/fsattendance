@@ -65,6 +65,10 @@ def get_mysql_category():
 @app.route('/specific', methods=['GET'])
 def get_mysql_specefic():
     input_type = request.args.get('type')
+    if input_type != 'name' and input_type != 'email': return {
+        "results": "Bad input types",
+        "status_code": 404
+    }
     input_text = request.args.get('input')
     categories = category_checker(request.args.get('categories'))
     if not categories: return {

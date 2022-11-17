@@ -1,10 +1,31 @@
-.menu-item {
-  float: left;
-  text-align: center;
+.topnav {
   background-color: #333;
   height: 40px;
 }
 
+.menu-item {
+  float: left;
+  text-align: center;
+  height: 40px;
+}
+
 .left-push {
-  padding-left: 100px;
+  padding-left: 10px;
+}
+
+.checkbox-dynamic {
+  float: left;
+}
+
+.padding-top {
+  padding-top: 10px;
+}
+
+.dynamic-search-label {
+  font-size: 15px;
+  margin-top: 11px;
+}
+
+.leftmost {
+  width: 240px;
 }
