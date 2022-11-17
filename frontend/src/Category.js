@@ -61,7 +61,7 @@ const Category = () => {
         <div id="ddcbl" className="dropdown-check-list">
             <span className="anchor" onClick={dropDownEventLoader}>Select categories:</span>
             <ul className="items">
-                <li><input type="checkbox" id="check-all" onClick={allCategoriesClick} />All</li>
+                <li><input type="checkbox" id="check-all" onClick={allCategoriesClick} defaultChecked/>All</li>
                 <li><input type="checkbox" id="check-room-name" onClick={specificCategoryClick} />Room name</li>
                 <li><input type="checkbox" id="check-room-start" onClick={specificCategoryClick} />Room start time</li>
                 <li><input type="checkbox" id="check-room-end" onClick={specificCategoryClick} />Room end time</li>

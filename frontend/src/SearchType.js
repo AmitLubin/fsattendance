@@ -11,7 +11,7 @@ function dropDownEventLoader(e) {
 
 class SearchType extends Component {
     stateUpdater = (e) => {
-        this.setState({ searchBy: "Search by " + e.currentTarget.innerHTML })
+        this.setState({ searchBy: "Search by: " + e.currentTarget.innerHTML })
     }
     
     state = { searchBy: "Search by:" }

@@ -4,7 +4,7 @@ import Category from "./Category";
 import Searches from "./Searches";
 import SearchType from "./SearchType"
 
-const Menu = () => {
+const Menu = props => {
     return(
         <div className="topnav">
             <div className="menu-item leftmost">
@@ -20,7 +20,7 @@ const Menu = () => {
                 <SearchType />
             </div>
             <div className="menu-item left-push">
-                <Searches />
+                <Searches changeStateData={props.changeStateData}/>
             </div>
         </div> 
     );
