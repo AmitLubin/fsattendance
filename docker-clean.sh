@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # stop the containers:
-docker-compose down
+docker-compose stop
 # delete all containers:
 if [[ -n $(docker ps -a -q) ]]; then
     docker rm -f $(docker ps -a -q)
@@ -10,3 +10,5 @@ fi
 if [[ -n $(docker volume ls -q) ]]; then
     docker volume rm $(docker volume ls -q)
 fi
+docker-compose rm -f
+docker-compose pull
