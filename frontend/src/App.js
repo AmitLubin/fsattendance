@@ -13,21 +13,31 @@ class App extends Component {
     changeStateData = newDataValue => this.setState({ data: newDataValue });
 
     async componentDidMount(){
-        let tempArray = [];
         await fetch('http://localhost:5000/')
             .then(res => res.json())
-            .then(newData => {
-                tempArray = tempArray.concat(newData);
-            });
-        this.setState({ data: tempArray.results });
+            .then(newData => {;
+                this.setState({ data: newData });
+        });
     }
     
     render() {
+        console.log(this.state.data);
+
         return(
             <div className="background">
                 <div className="menu">
                     <Menu changeStateData={this.changeStateData}/>
                 </div>
+                
+            </div>
+        );
+    }
+    
+}
+
+export default App;
+
+/*
                 <div className="list">
                     <div className="table">
                         <table>
@@ -49,10 +59,4 @@ class App extends Component {
                         </table>  
                     </div>
                 </div>
-            </div>
-        );
-    }
-    
-}
-
-export default App;
+*/

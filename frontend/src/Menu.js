@@ -1,7 +1,7 @@
 import { Component } from "react";
 import "./css/Menu.css"
 import Category from "./Category";
-import Searches from "./Searches";
+import SpecificSearches from "./SpecificSearches";
 import SearchType from "./SearchType"
 
 const Menu = props => {
@@ -20,7 +20,10 @@ const Menu = props => {
                 <SearchType />
             </div>
             <div className="menu-item left-push">
-                <Searches changeStateData={props.changeStateData}/>
+                
+            </div>
+            <div className="menu-item left-push">
+                <SpecificSearches changeStateData={props.changeStateData}/>
             </div>
         </div> 
     );
