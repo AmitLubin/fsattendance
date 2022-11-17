@@ -2,7 +2,6 @@
 
 import jellyfish
 import os
-import sys
 import csv
 import mysql.connector
 from mysql.connector import Error
@@ -52,7 +51,7 @@ def init_sql():
             print('Connection terminated')
         except:
             print('Connection never established')
-        return None, None
+        return None, None, True
     
     cursor = connection.cursor()
     
@@ -70,7 +69,7 @@ def init_sql():
     
     cursor.execute(create_attendance_table)
     
-    return connection, cursor
+    return connection, cursor, False
 
 def get_data(csvread, cursor):
     # csv columns headers columns:
@@ -364,8 +363,8 @@ def post_csv(dirpath):
     helpful functions can be used to debug: print_full_attendance(cursor), print_time_dict(time_dict), get_table(cursor)
     """
     csv_lst = get_files(dirpath)
-    connection, cursor = init_sql()
-    if connection == None: return "Bad connection to database"
+    connection, cursor, error = init_sql()
+    if error == True: return "Bad connection to database"
     for i in range(len(csv_lst)):
         time_dict = {}
         max_overall = get_data(csv_lst[i], cursor)
@@ -382,8 +381,8 @@ def post_api(dir):
     return 'Done!'
 
 def get_api(categories):
-    connection, cursor = init_sql()
-    if connection == None: return "Bad connection to database"
+    connection, cursor, error = init_sql()
+    if error == True: return "Bad connection to database"
     try:
         results = get_table(cursor, categories)
     except:
@@ -393,8 +392,8 @@ def get_api(categories):
         return results
     
 def get_specific_api(categories, input_type, input_text, dynamic):
-    connection, cursor = init_sql()
-    if connection == None: return "Bad connection to database"
+    connection, cursor, error = init_sql()
+    if error == True: return "Bad connection to database"
     try:
         if dynamic: results = get_table_dynamic(cursor, categories, input_type, input_text)
         else: results = get_table_specifics(cursor, categories, input_type, input_text)
@@ -405,8 +404,8 @@ def get_specific_api(categories, input_type, input_text, dynamic):
         return results
 
 def get_avg_api(input_text, dynamic):
-    connection, cursor = init_sql()
-    if connection == None: return "Bad connection to database"
+    connection, cursor, error = init_sql()
+    if error == True: return "Bad connection to database"
     try:
         if dynamic: results = get_average_dynamic(cursor, input_text)
         else: results = get_average_specific(cursor, input_text)
