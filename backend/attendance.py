@@ -1,12 +1,12 @@
-#! /usr/bin/python
+#!/usr/bin/python3
 
-import jellyfish # jellyfish requires installation
+import jellyfish
 import os
 import sys
 import csv
-import mysql.connector # mysql requires installation
+import mysql.connector
 from mysql.connector import Error
-from dotenv import load_dotenv # dotenv requires installation
+from dotenv import load_dotenv
 
 def get_files(dirpath):
     """
@@ -27,7 +27,7 @@ def get_files(dirpath):
     return attend_files
 
 def init_sql():
-    
+    # loading the environment vari
     load_dotenv()
     
     mysql_user = os.getenv("MYSQL_USER")
