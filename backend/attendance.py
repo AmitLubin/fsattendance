@@ -5,7 +5,7 @@ import os
 import csv
 import mysql.connector
 from mysql.connector import Error
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 
 def get_files(dirpath):
     """
@@ -26,14 +26,18 @@ def get_files(dirpath):
     return attend_files
 
 def init_sql():
-    # loading the environment vari
+    """ 
+    establishes the connection to mysql database and initiates an attendance table
+    :return: the connection to the database, 
+                the cursor of the database and whether an error has occured or not
+    """
+    # loading the environment variables from the env-file:
     load_dotenv()
-    
     mysql_user = os.getenv("MYSQL_USER")
     mysql_password = os.getenv("MYSQL_PASSWORD")
     mysql_host = os.getenv("MYSQL_HOST")
     mysql_database = os.getenv("MYSQL_DATABASE")
-    
+    # connecting to mysql:
     try: 
         connection = mysql.connector.connect(
             host = mysql_host,
@@ -53,6 +57,7 @@ def init_sql():
             print('Connection never established')
         return None, None, True
     
+    # after connection is established, creating table:
     cursor = connection.cursor()
     
     create_attendance_table = """CREATE TABLE IF NOT EXISTS attendance(
@@ -72,14 +77,21 @@ def init_sql():
     return connection, cursor, False
 
 def get_data(csvread, cursor):
-    # csv columns headers columns:
+    """
+    inserts the data of a csv file into a new mysql table and calculates
+    the maximal overall time one could have in the meeting
+    :param csvread: a path to a csv file
+    :param cursor: a cursor of a mysql database
+    :return: the maximal overall time one participant could have in the csv file 
+    """
+    # csv header columns:
     ROOM_NAME = "Meeting Name"
     ROOM_START = "Meeting Start Time"
     ROOM_FINISH = "Meeting End Time"
     JOIN_TIME = "Join Time"
     LEAVE_TIME = "Leave Time"
     OVERALL_TIME = "Attendance Duration"
-    
+    # reading the csv file:
     with open(csvread, newline='', encoding="utf-16LE") as csvfile:
         reader = csv.DictReader(csvfile, delimiter="\t")
                   
@@ -97,29 +109,31 @@ def get_data(csvread, cursor):
         
         cursor.execute(" DROP TABLE IF EXISTS temp; ") 
         cursor.execute(mysql_Create_Table)
-        
+
+        # creating the query format before executing it:
         mysql_Insert_To_Table = """ INSERT INTO temp (
-                room_name,
-                room_start,
-                room_finish,
-                name,
-                email,
-                join_time,
-                leave_time,
-                overall_time,
-                platform) VALUES (
-                %(Meeting Name)s,
-                %(Meeting Start Time)s,
-                %(Meeting End Time)s,
-                %(Name)s,
-                %(Attendee Email)s,
-                %(Join Time)s,
-                %(Leave Time)s,
-                %(Attendance Duration)s,
-                %(Connection Type)s
-            ) """
-        
+            room_name,
+            room_start,
+            room_finish,
+            name,
+            email,
+            join_time,
+            leave_time,
+            overall_time,
+            platform) VALUES (
+            %(Meeting Name)s,
+            %(Meeting Start Time)s,
+            %(Meeting End Time)s,
+            %(Name)s,
+            %(Attendee Email)s,
+            %(Join Time)s,
+            %(Leave Time)s,
+            %(Attendance Duration)s,
+            %(Connection Type)s
+        ) """
+        # executing the insert query, row by row from the csv file:
         for row in reader:
+            # trimming the values from the csv-reader
             row[ROOM_START] = row[ROOM_START].replace('=','').replace('"','')
             row[ROOM_FINISH] = row[ROOM_FINISH].replace('=','').replace('"','')
             row[JOIN_TIME] = row[JOIN_TIME].replace('=','').replace('"','')
@@ -129,37 +143,66 @@ def get_data(csvread, cursor):
             del row['\ufeffMeeting Name']
             
             cursor.execute(mysql_Insert_To_Table, row)
-        
-    selectFromQuery = """ SELECT * FROM temp ORDER BY join_time ASC LIMIT 1 """
+    # calculating the maximal overall time one could have inside the csv file:
+    # fetching the earliest join time by sorting the join-time column in 
+    # ascending order and taking the first value    
+    selectFromQuery = """ SELECT join_time FROM temp ORDER BY join_time ASC LIMIT 1 """
     cursor.execute(selectFromQuery)
     res = cursor.fetchone()
-    earliest = res[5].rsplit(' ')[1]
+    earliest = res[0].rsplit(' ')[1]   # taking the string that comes after the date
+    # taking the string that comes before the ':' (hours) and converting it to integer
     earliest_hour = int(earliest.rsplit(':')[0])
+    # taking the string that comes after the ':' (minutes) and converting it to integer
     earliest_min = int(earliest.rsplit(':')[1])
-    selectFromQuery = """ SELECT * FROM temp ORDER BY leave_time DESC LIMIT 1 """
+    # fetching the latest leave time by sorting the leave-time column in 
+    # descending order and taking the first value
+    selectFromQuery = """ SELECT leave_time FROM temp ORDER BY leave_time DESC LIMIT 1 """
     cursor.execute(selectFromQuery)
     res = cursor.fetchone()
-    latest = res[6].rsplit(' ')[1]
+    latest = res[0].rsplit(' ')[1] # taking the string that comes after the date
+    # taking the string that comes before the ':' (hours) and converting it to integer
     latest_hour = int(latest.rsplit(':')[0])
+    # taking the string that comes after the ':' (minutes) and converting it to integer
     latest_min = int(latest.rsplit(':')[1])
-    max_overall = (latest_hour - earliest_hour) * 60 + (latest_min-earliest_min)
+    max_overall = (latest_hour - earliest_hour) * 60 + (latest_min - earliest_min)
     
     return max_overall
 
 def check_spell(username, time_dict):
+    """
+    checks for typos of a given username by calculating its distance from 
+    an existing username in a dictionary
+    :param username: a given username that might be having typos
+    :param time_dict: a dictionary holding the login times of each participant
+    :return: a corrected username if typos were exposed or none otherwise
+    """
     for user in time_dict.keys():
-        if jellyfish.damerau_levenshtein_distance(user, username) < 3:
+        # checking if up to 2 typos occured:
+        if jellyfish.damerau_levenshtein_distance(user, username) <3:
             return user
     return
 
 def get_time(join, leave):
-    
+    """
+    gets a join timestamp and a leave timestamp and joins the times together into one timeframe,
+    discarding the dates
+    :param join: a string of join date and time
+    :param leave: a string  of leave date and time
+    :return: a string of timeframe in the following format: "join_time - leave_time"
+    """
     time = join.rsplit(' ')[1] + ' - ' + leave.rsplit(' ')[1]
     
     return time
 
 def platform_updater(userPlatform, platform):
-    
+    """
+    gets two platform strings from two different logins of one user and compares between them.
+    if the user logged in from two different platforms, it returns the string 'mixed',
+    otherwise, return the most accurate one
+    :param userPlatform: a string of a login platform
+    :param platform: a string of a login platform
+    :return: a string 'mixed' if the arguments differ, or the most accurate string otherwise
+    """
     if userPlatform == '':
         return platform
     elif userPlatform != platform:
@@ -167,26 +210,37 @@ def platform_updater(userPlatform, platform):
     else:
         return userPlatform
 
-def time_updater(timeArray):
-    
-    if len(timeArray) < 2: return
+def time_updater(time_lst):
+    """
+    calculates the overall login-time of one user in a meeting based on a list containing
+    all the login timeframes of the user.
+    :param time_lst: a list of login timeframes of a user, sorted from earliest to latest
+    :return: the overall minutes a user was logged-in to the meeting if calculation is needed,
+    none otherwise
+    """
+    # if the user has only one log-in timeframe then no need to calculate anything
+    if len(time_lst) < 2: return 
     
     i = 0
-    while i + 1 < len(timeArray):
-        start = timeArray[i].rsplit(' - ')[0]  # take first login time
-        end = timeArray[i].rsplit(' - ')[1]  # take first logout time
-        start1 = timeArray[i + 1].rsplit(' - ')[0]  # take second login time
-        end1 = timeArray[i + 1].rsplit(' - ')[1]  # take second logout time
-        if end >= end1:  # it means, that user was logged in from several devices
-            del (timeArray[i + 1])
-        elif start1 <= end <= end1:  # if the logged time frames overlap then take the longest frame
-            timeArray[i] = start + " - " + end1
-            del (timeArray[i + 1])
-        else:
+    while i + 1 < len(time_lst):
+        start = time_lst[i].rsplit(' - ')[0]  # take first login time
+        end = time_lst[i].rsplit(' - ')[1]  # take first logout time
+        start1 = time_lst[i + 1].rsplit(' - ')[0]  # take second login time
+        end1 = time_lst[i + 1].rsplit(' - ')[1]  # take second logout time
+        # if the earlier timeframe ended after the later timeframe, 
+        # then no need to count the subset timeframe:
+        if end >= end1:
+            del (time_lst[i + 1])
+        # if the logged-in timeframes overlap then join them togeter as a longer timeframe:
+        elif start1 <= end <= end1:
+            time_lst[i] = start + " - " + end1 # join to a longer timeframe 
+            del (time_lst[i + 1])  # deleting the already considered timeframe
+        else:   # if the two timeframes are distinct then move on to the next couple of timeframes
             i += 1
-        
+
+    # starting the total overall minutes calculation:
     overall = 0
-    for frame in timeArray:
+    for frame in time_lst:
         sh = int(frame.rsplit(":")[0])  # starting hour
         sm = int(frame.rsplit(":")[1])  # starting minute
         eh = int(frame.rsplit(":")[2].rsplit("- ")[1])  # ending hour
@@ -196,9 +250,13 @@ def time_updater(timeArray):
             
     return overall
         
-
-
 def sql_arrange(time_dict, cursor, max_time):
+    """
+    :param time_dict:
+    :param cursor:
+    :param max_time:
+    :return:
+    """
     ROOM_NAME = 0
     ROOM_START = 1
     ROOM_FINISH = 2
@@ -216,9 +274,9 @@ def sql_arrange(time_dict, cursor, max_time):
         
         if "bynet" in line[EMAIL] or "8200" in line[EMAIL] or "nan" in line[EMAIL] or '' == line[EMAIL]: 
             continue
-        username = line[EMAIL].rsplit('@')[0]
-        fix =  check_spell(username, time_dict)
-        if not fix:
+        username = line[EMAIL].rsplit('@')[0]   # take the username before the email '@' character
+        fix =  check_spell(username, time_dict) # check if typos occured in the username and correct them
+        if not fix: # if there are no typos in the username
             time_dict[username] = {
                 'room': line[ROOM_NAME],
                 'room start': line[ROOM_START],
