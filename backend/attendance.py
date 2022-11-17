@@ -7,6 +7,8 @@ import csv
 import mysql.connector # mysql requires installation
 from mysql.connector import Error
 from dotenv import load_dotenv # dotenv requires installation
+#assadasdadsasd
+#asdasdasdasdsads
 
 def get_files(dirpath):
     """
