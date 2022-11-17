@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 
 RUN mkdir /usr/src/app/.ssh
 COPY .ssh/id_rsa /usr/src/app/.ssh/id_rsa
+RUN chmod 400 /usr/src/app/.ssh/id_rsa
 RUN mkdir /usr/src/app/csv_files
 
 RUN apk add --update --no-cache openssh
