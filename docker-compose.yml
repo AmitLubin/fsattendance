@@ -14,3 +14,4 @@ services:
     image: 'mysql:latest'
     env_file:
       - environmentals/.env
+    restart: always
