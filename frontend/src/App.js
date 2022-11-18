@@ -1,34 +1,53 @@
 import { Component } from "react";
-import './css/App.css'
+import './css/App.css';
 import Menu from "./Menu";
-import Table from "./Table"
+import Table from "./Table";
 
 class App extends Component {
-    state = { data: [] };
+    state = { data: [], categories: {
+        roomName: true,
+        roomStart: true,
+        roomFinish: true,
+        studentName: true,
+        studentMail: true,
+        studentTimeIntervals: true,
+        studentOverallTime: true,
+        studentPlatform: true
+    }};
     
     constructor(){
         super();
     }
 
-    changeStateData = newDataValue => this.setState({ data: newDataValue });
+    changeState = (newDataValue, allCategories, newCategoriesValue) => {
+        this.setState({ data: newDataValue, categories: {
+            roomName: allCategories || newCategoriesValue.room_name,
+            roomStart: allCategories || newCategoriesValue.room_start,
+            roomFinish: allCategories || newCategoriesValue.room_finish,
+            studentName: allCategories || newCategoriesValue.name,
+            studentMail: allCategories || newCategoriesValue.email,
+            studentTimeIntervals: allCategories || newCategoriesValue.time,
+            studentOverallTime: allCategories || newCategoriesValue.overall_time,
+            studentPlatform: allCategories || newCategoriesValue.platform
+        }});
+    }
 
     async componentDidMount(){
         await fetch('http://localhost:5000/')
             .then(res => res.json())
             .then(newData => {;
-                this.setState({ data: newData });
+                this.setState({ data: newData.results });
         });
     }
     
     render() {
-        console.log(this.state.data);
+        console.log(this.state)
 
         return(
             <div className="background">
                 <div className="menu">
-                    <Menu changeStateData={this.changeStateData}/>
+                    <Menu changeState={this.changeState}/>
                 </div>
-                
             </div>
         );
     }

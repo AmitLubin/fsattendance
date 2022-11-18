@@ -1,5 +1,5 @@
 import React from "react";
-import "./css/SpecificSearches.css";
+import "./css/Searches.css";
 
 function getAllCategories(){
     const categories = {
@@ -23,60 +23,38 @@ function getCategoriesString(categoriesString, categories){
     for (const [category, checked] of Object.entries(categories)){
         if (checked){
             if (categoriesString == '')
-                categoriesString = "categories=" + category;
+                categoriesString = "?categories=" + category;
             else 
                 categoriesString += ',' + category;
         }
     }
 
-    categoriesString += '&'
-
     return categoriesString;
 }
 
-function getSearchType(searchBy){
-    if (searchBy == "Search by: Student name")
-        return "type=name&";
-    else if (searchBy == "Search by: Student email")
-        return "type=email&";
-    else
-        return "bad type";
-}
-
-const SpecificSearches = props => {
-    async function searchSpecific(e){
+const Searches = props => {
+    async function search(e){
         const categories = getAllCategories();
         let categoriesString = '';
         if (categories.all == false) {
             categoriesString = getCategoriesString(categoriesString, categories.specific);
         }
-
-        const inputType = getSearchType(props.searchByState);
-        if (inputType == "bad type"){
-            document.getElementById('specific-input-id').placeholder="Choose a search type";
-            return;
-        }
-
-        const inputText = "input=" + document.getElementById('specific-input-id').value;
-
-        let dynamic = '';
-        if (document.getElementById('dynamic-checkbox').checked)
-            dynamic = '&dynamic';
-
-        await fetch('http://localhost:5000/specific?' + categoriesString + inputType + inputText + dynamic)
+            
+        await fetch('http://localhost:5000/' + categoriesString)
                 .then(res => res.json())
                 .then(newData => {
                     props.changeState(newData.results, categories.all, categories.specific);
+                    //props.changeStateData(newData.results);
         });
         
     }
 
-    return (
+    return(
         <div>
-            <input type="text" name="search-bar" id="specific-input-id" placeholder="Search by specific category" className="specific-bar" />
-            <button type="submit" className="button" onClick={searchSpecific}><i className="fa fa-search"></i></button>
+            <button type="submit" className="search-button" onClick={search}>Search <i className="fa fa-search"></i></button>
         </div>
     );
+    
 }
 
-export default SpecificSearches;
+export default Searches;
