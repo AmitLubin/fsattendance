@@ -4,7 +4,7 @@ import Category from "./Category";
 import SearchType from "./SearchType";
 import Searches from "./Searches";
 import SpecificSearches from "./SpecificSearches";
-
+import Update from "./Update";
 
 
 class Menu extends React.Component { 
@@ -40,7 +40,7 @@ class Menu extends React.Component {
                     <SpecificSearches changeState={this.props.changeState} searchByState={this.state.searchBy}/>
                 </div>
                 <div className="rightmost">
-
+                    <Update />
                 </div>
             </div> 
         );

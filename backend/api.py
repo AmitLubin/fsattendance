@@ -57,7 +57,7 @@ def get_mysql_category():
         "status_code": 204
     }
     return {
-        "results": json.dumps(results),
+        "results": results,
         "status_code": 200,
         "results_count": len(results)
     }
@@ -89,7 +89,7 @@ def get_mysql_specefic():
         "status_code": 204
     }
     return {
-        "results": json.dumps(results),
+        "results": results,
         "status_code": 200,
         "results_count": len(results)
     }

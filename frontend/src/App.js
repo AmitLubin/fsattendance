@@ -41,12 +41,13 @@ class App extends Component {
     }
     
     render() {
-        console.log(this.state)
-
         return(
             <div className="background">
                 <div className="menu">
-                    <Menu changeState={this.changeState}/>
+                    <Menu changeState={this.changeState} />
+                </div>
+                <div className="table">
+                    <Table categories={this.state.categories} data={this.state.data} />
                 </div>
             </div>
         );
@@ -55,27 +56,3 @@ class App extends Component {
 }
 
 export default App;
-
-/*
-                <div className="list">
-                    <div className="table">
-                        <table>
-                            <thead id="thead">
-                                <tr>
-                                    <th className="cell">Room name</th>
-                                    <th className="cell">Room start time</th>
-                                    <th className="cell">Room end time</th>
-                                    <th className="nameCell">Student name</th>
-                                    <th className="mailCell">Student mail</th>
-                                    <th className="cell">Student attendance time stamps</th>
-                                    <th className="cell">Student overall attendance time (mins)</th>
-                                    <th className="cell">Student platform</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody">
-                                <Table queries={this.state.data}/>
-                            </tbody>
-                        </table>  
-                    </div>
-                </div>
-*/
