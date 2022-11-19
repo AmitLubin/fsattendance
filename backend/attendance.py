@@ -149,24 +149,12 @@ def get_data(csvread, cursor):
     selectFromQuery = """ SELECT join_time FROM temp ORDER BY join_time ASC LIMIT 1 """
     cursor.execute(selectFromQuery)
     res = cursor.fetchone()
-    earliest = res[0].rsplit(' ')[1]   # taking the string that comes after the date
-    # taking the string that comes before the ':' (hours) and converting it to integer
-    earliest_hour = int(earliest.rsplit(':')[0])
-    # taking the string that comes after the ':' (minutes) and converting it to integer
-    earliest_min = int(earliest.rsplit(':')[1])
-    # fetching the latest leave time by sorting the leave-time column in 
-    # descending order and taking the first value
+    cursor.execute(f" UPDATE temp SET room_start='{res[0]}' ")
+    
     selectFromQuery = """ SELECT leave_time FROM temp ORDER BY leave_time DESC LIMIT 1 """
     cursor.execute(selectFromQuery)
     res = cursor.fetchone()
-    latest = res[0].rsplit(' ')[1] # taking the string that comes after the date
-    # taking the string that comes before the ':' (hours) and converting it to integer
-    latest_hour = int(latest.rsplit(':')[0])
-    # taking the string that comes after the ':' (minutes) and converting it to integer
-    latest_min = int(latest.rsplit(':')[1])
-    max_overall = (latest_hour - earliest_hour) * 60 + (latest_min - earliest_min)
-    
-    return max_overall
+    cursor.execute(f" UPDATE temp SET room_finish='{res[0]}' ")
 
 def check_spell(username, time_dict):
     """
