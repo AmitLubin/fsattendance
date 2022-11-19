@@ -1,6 +1,7 @@
 .topnav {
   background-color: #333;
   height: 40px;
+  width: 100%;
 }
 
 .menu-item {
@@ -28,4 +29,16 @@
 
 .leftmost {
   width: 240px;
+}
+
+.left-push-bigger{
+  padding-left: 40px;
+}
+
+.rightmost{
+  width: 180px;
+  float: right;
+  text-align: center;
+  height: 40px;
+  padding-right: 5px;
 }
