@@ -248,6 +248,44 @@ def time_updater(time_lst):
         overall += (eh - sh) * 60 + (em - sm)
             
     return overall
+
+def check_hebrew(s):
+    """
+    checks if a string contains any hebrew letter, if so returns true, else returns false
+    :param s: string
+    :return: bool
+    """
+    for c in s:
+        if ord('\u05d0') <= ord(c) <= ord('\u05ea'):    # if the character is in range of the unicode of hebrew letters
+            return True
+    return False
+
+def choose_name(origin_name, new_name):
+    """
+    Chooses a better name from a pair of two names
+    return: string of the better name
+    """
+    if check_hebrew(origin_name) and not check_hebrew(new_name):
+        return new_name
+    elif not check_hebrew(origin_name) and check_hebrew(new_name):
+        return origin_name
+    else:
+        if len(origin_name) > len(new_name):
+            return origin_name
+        else:
+            return new_name
+
+def check_empty_fields(line, user):
+    ROOM_NAME = 0
+    ROOM_START = 1
+    ROOM_FINISH = 2
+    OVERALL_TIME = 7
+    
+    if user['room'] == '': user['room'] = line[ROOM_NAME]
+    if user['room start'] == '': user['room start'] = line[ROOM_START]
+    if user['room finish'] == '': user['room finish'] = line[ROOM_FINISH]
+    if user['overall time'] == '': user['overall time'] = line[OVERALL_TIME]
+    
         
 def sql_arrange(time_dict, cursor, max_time):
     """
@@ -289,12 +327,13 @@ def sql_arrange(time_dict, cursor, max_time):
                 'platform': ''
             }
         else:
-            username = fix  # if the username exists, then correct the typos if necessary 
-        # updating the user's login data in the dictionary based on each line in the table:
-        time = get_time(line[JOIN_TIME], line[LEAVE_TIME])  # get a string of the login timeframe
-        time_dict[username]['time'].append(time)    # add the timeframe to the timeframes list
-        # because the temp table is sorted by join-time the timeframe list will also be sorted the same way
-        # then, update the platform string:
+            username = fix # if the username exists, then correct the typos if necessary 
+            time_dict[username]['name'] = choose_name(time_dict[username]['name'], line[NAME])
+            check_empty_fields(line, time_dict[username])
+            
+        
+        time = get_time(line[JOIN_TIME], line[LEAVE_TIME])
+        time_dict[username]['time'].append(time)
         time_dict[username]['platform'] = platform_updater(time_dict[username]['platform'], line[PLATFORM])
     # calculate the accurate overall login time of each user:
     for user in time_dict.keys():
@@ -305,7 +344,11 @@ def sql_arrange(time_dict, cursor, max_time):
                 time_dict[user]['overall time'] = max_time"""
         # update the string of all timeframes to be equal to the timeframes list delimited by ','
         time_dict[user]['time string'] = ', '.join(time_dict[user]['time'])
-        del time_dict[user]['time'] # no need for this list now that we're done with timeframes calculation       
+        del time_dict[user]['time'] # no need for this list now that we're done with timeframes calculation
+
+def print_time_dict(time_dict):
+    for user in time_dict.keys():
+        print(time_dict[user])            
     
 def insert_dict(time_dict, cursor, connection):
     """
@@ -317,6 +360,8 @@ def insert_dict(time_dict, cursor, connection):
     # insert the final values of the participant's dictionary from a csv file
     # if 
     for user in time_dict.keys():
+        if time_dict[user]['room'] == '': continue
+        
         insertOrUpdateQuery = """
             INSERT INTO attendance (
                 room_name,
@@ -345,11 +390,6 @@ def insert_dict(time_dict, cursor, connection):
         cursor.execute(insertOrUpdateQuery, time_dict[user])
     connection.commit()
         
-def print_full_attendance(cursor):
-    cursor.execute(" SELECT * FROM attendance; ")
-    res = cursor.fetchall()
-    print(res)
-
 def disable_connection(connection, cursor):
     cursor.close()
     connection.close()
@@ -368,8 +408,31 @@ def sum_of_days(cursor):
         sum_days += (end_hours - start_hours)*60 + end_minutes - start_minutes
     return sum_days
 
+def get_user_average(cursor, mail, sum_all_days):
+    OVERALL_DAY_TIME = 0
+    
+    cursor.execute(f" SELECT overall_time FROM attendance WHERE email='{mail}'; ")
+    alluserdays = cursor.fetchall()
+    
+    sum_user_days = 0
+    for day in alluserdays:
+        sum_user_days += int(day[OVERALL_DAY_TIME])
+    
+    return sum_user_days/sum_all_days
+
 def get_average(cursor):
-    return 0
+    MAIL = 0
+    NAME = 1
+    
+    cursor.execute(" SELECT DISTINCT email,name FROM attendance; ")
+    users = cursor.fetchall()
+    avg = []
+    sum_all_days = sum_of_days(cursor)
+    
+    for user in users:
+        avg.append([user[MAIL], user[NAME], 100*get_user_average(cursor, user[MAIL], sum_all_days)])
+        
+    return avg
 
 def get_table(cursor, categories):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
@@ -382,7 +445,7 @@ def get_table_specifics(cursor, categories, input_type, input_text):
 def get_table_dynamic(cursor, categories, input_type, input_text):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
     res = cursor.fetchall()
-    cursor.execute(f" SELECT {input_type} FROM attendance ")
+    cursor.execute(f" SELECT {input_type} FROM attendance; ")
     search_by = cursor.fetchall()
     i = 0
     for search_result in search_by:
@@ -392,32 +455,6 @@ def get_table_dynamic(cursor, categories, input_type, input_text):
             i += 1
     
     return res
-
-def check_hebrew(s):
-    """
-    checks if a string contains any hebrew letter, if so returns true, else returns false
-    :param s: string
-    :return: bool
-    """
-    for c in s:
-        if ord('\u05d0') <= ord(c) <= ord('\u05ea'):    # if the character is in range of the unicode of hebrew letters
-            return True
-    return False
-
-def choose_name(origin_name, new_name):
-    """
-    Chooses a better name from a pair of two names
-    return: string of the better name
-    """
-    if check_hebrew(origin_name) and not check_hebrew(new_name):
-        return new_name
-    elif not check_hebrew(origin_name) and check_hebrew(new_name):
-        return origin_name
-    else:
-        if len(origin_name) > len(new_name):
-            return origin_name
-        else:
-            return new_name
     
 def reset_time_dict(time_dict):
     for user in time_dict.keys():
@@ -432,6 +469,11 @@ def reset_time_dict(time_dict):
             'overall time': '',
             'platform': ''
         }
+
+def update_names(time_dict, cursor, connection):
+    for user in time_dict.keys():
+        cursor.execute(f" UPDATE attendance SET name='{time_dict[user]['name']}' WHERE email='{time_dict[user]['email']}'; ")
+    connection.commit()
 
 def post_csv(dirpath):
     """
@@ -452,8 +494,14 @@ def post_csv(dirpath):
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
         insert_dict(time_dict, cursor, connection)
+    update_names(time_dict, cursor, connection)
     disable_connection(connection, cursor)
     return "good connection"
+
+def delete_database(cursor, connection):
+    cursor.execute(" DELETE FROM attendance; ")
+    connection.commit()
+    return "Database deleted successfully"
 
 def post_api(dir):
     if not os.path.isdir(dir):
@@ -496,3 +544,13 @@ def get_avg_api():
         disable_connection(connection, cursor)
         return results
 
+def delete_api():
+    connection, cursor, error = init_sql()
+    if error == True: return "Bad connection to database"
+    try:
+        results = delete_database(cursor, connection)
+    except:
+        results = 'problem with request'
+    finally:
+        disable_connection(connection, cursor)
+        return results
