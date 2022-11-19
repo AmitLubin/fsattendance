@@ -12,7 +12,8 @@ class App extends Component {
         studentMail: true,
         studentTimeIntervals: true,
         studentOverallTime: true,
-        studentPlatform: true
+        studentPlatform: true,
+        average: false
     }};
     
     constructor(){
@@ -28,7 +29,22 @@ class App extends Component {
             studentMail: allCategories || newCategoriesValue.email,
             studentTimeIntervals: allCategories || newCategoriesValue.time,
             studentOverallTime: allCategories || newCategoriesValue.overall_time,
-            studentPlatform: allCategories || newCategoriesValue.platform
+            studentPlatform: allCategories || newCategoriesValue.platform,
+            average: false
+        }});
+    }
+
+    changeAvgState = (newDataValue) => {
+        this.setState({ data: newDataValue, categories: {
+            roomName: false,
+            roomStart: false,
+            roomFinish: false,
+            studentName: true,
+            studentMail: true,
+            studentTimeIntervals: false,
+            studentOverallTime: false,
+            studentPlatform: false,
+            average: true
         }});
     }
 
@@ -44,7 +60,7 @@ class App extends Component {
         return(
             <div className="background">
                 <div className="menu">
-                    <Menu changeState={this.changeState} />
+                    <Menu changeState={this.changeState} changeAvgState={this.changeAvgState}/>
                 </div>
                 <div className="table">
                     <Table categories={this.state.categories} data={this.state.data} />

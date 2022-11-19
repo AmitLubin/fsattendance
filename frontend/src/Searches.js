@@ -44,7 +44,6 @@ const Searches = props => {
                 .then(res => res.json())
                 .then(newData => {
                     props.changeState(newData.results, categories.all, categories.specific);
-                    //props.changeStateData(newData.results);
         });
         
     }

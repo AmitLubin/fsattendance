@@ -35,6 +35,10 @@
   padding-left: 40px;
 }
 
+.left-push-massive{
+  padding-left: 80px;
+}
+
 .rightmost{
   width: 180px;
   float: right;

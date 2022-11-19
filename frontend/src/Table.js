@@ -22,12 +22,14 @@ function checkCategories(categoriesChecker){
         categories.push("Student overall attendance");
     if (categoriesChecker.studentPlatform)
         categories.push("Student platform");
+    if (categoriesChecker.average)
+        categories.push("Average");
     
     return categories;
 }
 
-function setTableWidth(categories){
-    let width = 40;
+function setTableWidth(categories, header){
+    let width = 16 + categories.length * 3;
     categories.map(category => {
         if (category == "Student mail")
             width += 400;
@@ -35,30 +37,35 @@ function setTableWidth(categories){
             width += 160;
     });
 
-    console.log(width.toString() + "px");
-
-    document.getElementById('d-table').style.width = (width+2).toString() + "px";
-    document.getElementById('table-header-row').style.width = width.toString() + "px";
-    document.getElementById('table-body').style.width = (width+2).toString() + "px";
+    if (header) return {
+        width: width.toString() + "px"
+    };
+    return {
+        width: (width+2).toString() + "px"
+    };
 }
 
 const Table = props => {
+    if (typeof props.data === 'string') {
+        console.log(props.data);
+        return;
+    }
     if (props.data.length === 0) return;
 
     const categories = checkCategories(props.categories);
     if (categories.length === 0) return;
 
-    setTableWidth(categories);
+    //setTableWidth(categories);
 
     return (
         <div id="table">
-            <table id="d-table">
-                <thead id="table-header-row">
+            <table id="d-table" style={setTableWidth(categories, false)}>
+                <thead id="table-header-row" style={setTableWidth(categories, true)}>
                     <tr >
                         <TableHeader categories={categories} />
                     </tr>
                 </thead>
-                <tbody id="table-body">
+                <tbody id="table-body" style={setTableWidth(categories, false)}>
                     <TableBody categories={categories} data={props.data} />
                 </tbody>
             </table>
