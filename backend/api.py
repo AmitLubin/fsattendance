@@ -1,6 +1,6 @@
 from flask import Flask, request # flask requires installation
 from flask_cors import CORS
-from attendance import post_api, get_api, get_specific_api, get_avg_api
+from attendance import post_api, get_api, get_specific_api, get_avg_api, delete_api
 from dotenv import load_dotenv
 import json
 import os
@@ -27,7 +27,7 @@ def category_checker(categories):
 def insert_csv():
     load_dotenv()
     source_ssh = os.getenv("SSH_ADDRESS")
-    os.system(f'scp -i .ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {source_ssh} ./csv_files/')
+    os.system(f'scp -i ./.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {source_ssh} ./csv_files/')
     folder = 'csv_files/'
     results = post_api(folder)
     if results == 'Done!': return {
@@ -60,6 +60,18 @@ def get_mysql_category():
         "results": results,
         "status_code": 200,
         "results_count": len(results)
+    }
+
+@app.route('/', methods=['DELETE'])
+def delete_everythin():
+    results = delete_api()
+    if results == 'problem with request' or results == "Bad connection to database": return {
+        "results": results,
+        "status_code": 404
+    }
+    else: return {
+        "results": results,
+        "status_code": 204
     }
 
 @app.route('/specific', methods=['GET'])
@@ -101,13 +113,14 @@ def get_average():
         "results": results,
         "status_code": 404
     }
-    elif results == 0: return {
-        "error": "Something went wrong",
-        "status_code": 404
+    elif len(results) == 0: return {
+        "error": "No results",
+        "status_code": 204
     }
     return {
         "results": results,
-        "status_code": 200
+        "status_code": 200,
+        "results_count": len(results)
     }
     
 
