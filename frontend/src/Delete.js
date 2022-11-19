@@ -5,31 +5,31 @@ const sleep = ms => new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
 })
 
-class Update extends Component {
-    state = { icon: "Click to update database" };
-    
+class Delete extends Component {
+    state = { icon: "Press to delete" }
+
     constructor(){
         super();
     }
 
-    updateDatabase = async e => {
+    deleteDatabase = async e => {
         this.setState({ icon: "waiting" });
-        
-        const requestOptions = { method: 'POST' };
+
+        const requestOptions = { method: 'DELETE' };
         await fetch('http://localhost:5000/', requestOptions)
             .then(response => response.json())
             .then(data => this.setState({ icon: data.results }));
         
         await sleep(1400);
 
-        this.setState({ icon: "Click to update database" });
+        this.setState({ icon: "Click to delete database" });
     }
     
     render(){
         return(
-            <button className="post-button" onClick={this.updateDatabase}>{this.state.icon}</button>
+            <button className="post-button" onClick={this.deleteDatabase}>{this.state.icon}</button>
         );
     }
 }
-
-export default Update;
+    
+export default Delete;

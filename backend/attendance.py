@@ -423,16 +423,16 @@ def get_user_average(cursor, mail, sum_all_days):
     return sum_user_days/sum_all_days
 
 def get_average(cursor):
-    MAIL = 0
-    NAME = 1
+    NAME = 0
+    MAIL = 1
     
-    cursor.execute(" SELECT DISTINCT email,name FROM attendance; ")
+    cursor.execute(" SELECT DISTINCT name,email FROM attendance; ")
     users = cursor.fetchall()
     avg = []
     sum_all_days = sum_of_days(cursor)
     
     for user in users:
-        avg.append([user[MAIL], user[NAME], 100*get_user_average(cursor, user[MAIL], sum_all_days)])
+        avg.append([user[NAME], user[MAIL], 100*get_user_average(cursor, user[MAIL], sum_all_days)])
         
     return avg
 
