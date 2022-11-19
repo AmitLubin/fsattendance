@@ -404,7 +404,7 @@ def get_table_specifics(cursor, categories, input_type, input_text):
 def get_table_dynamic(cursor, categories, input_type, input_text):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
     res = cursor.fetchall()
-    cursor.execute(f" SELECT {input_type} FROM attendance ")
+    cursor.execute(f" SELECT {input_type} FROM attendance; ")
     search_by = cursor.fetchall()
     i = 0
     for search_result in search_by:
@@ -431,7 +431,7 @@ def reset_time_dict(time_dict):
 
 def update_names(time_dict, cursor):
     for user in time_dict.keys():
-        cursor.execute(f" UPDATE attendance SET name='{time_dict[user]['name']}' WHERE email='{time_dict[user]['email']}' ")
+        cursor.execute(f" UPDATE attendance SET name='{time_dict[user]['name']}' WHERE email='{time_dict[user]['email']}'; ")
 
 def post_csv(dirpath):
     """
@@ -455,6 +455,9 @@ def post_csv(dirpath):
     update_names(time_dict, cursor)
     disable_connection(connection, cursor)
     return "good connection"
+
+def delete_database(cursor):
+    cursor.execute(" DELETE FROM attendance; ")
 
 def post_api(dir):
     if not os.path.isdir(dir):
