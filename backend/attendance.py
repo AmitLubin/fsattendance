@@ -214,12 +214,11 @@ def time_updater(time_lst):
     """
     calculates the overall login-time of one user in a meeting based on a list containing
     all the login timeframes of the user.
-    :param time_lst: a list of login timeframes of a user, sorted from earliest to latest
-    :return: the overall minutes a user was logged-in to the meeting if calculation is needed,
-    none otherwise
+    :param time_lst: list of at least 2 login timeframes of a user, sorted from earliest to latest
+    :return: the overall minutes a user was logged-in to the meeting
     """
     # if the user has only one log-in timeframe then no need to calculate anything
-    if len(time_lst) < 2: return 
+    #if len(time_lst) < 2: return 
     
     i = 0
     while i + 1 < len(time_lst):
@@ -252,9 +251,10 @@ def time_updater(time_lst):
         
 def sql_arrange(time_dict, cursor, max_time):
     """
-    :param time_dict:
-    :param cursor:
-    :param max_time:
+    goes over each row in a meeting table and updates the paticipant's dictionary accordingly
+    :param time_dict: a dictionary holding the login times of each participant in a meeting
+    :param cursor: a cursor to the mysql attendance database
+    :param max_time: the maximal time one can be logged-in in a meeting 
     :return:
     """
     ROOM_NAME = 0
@@ -269,14 +269,14 @@ def sql_arrange(time_dict, cursor, max_time):
     
     cursor.execute(" SELECT * FROM temp ORDER BY join_time ASC; ")
     tempList = cursor.fetchall()
-    
+    # now tempList is a list of tupples, each tupple is a row in the temp table sorted by join time 
     for line in tempList:
-        
+        # if participant is non-student then skip:
         if "bynet" in line[EMAIL] or "8200" in line[EMAIL] or "nan" in line[EMAIL] or '' == line[EMAIL]: 
             continue
         username = line[EMAIL].rsplit('@')[0]   # take the username before the email '@' character
         fix =  check_spell(username, time_dict) # check if typos occured in the username and correct them
-        if not fix: # if there are no typos in the username
+        if not fix: # if the username doesn't exist in the dictionary then create an entry for it
             time_dict[username] = {
                 'room': line[ROOM_NAME],
                 'room start': line[ROOM_START],
@@ -289,28 +289,32 @@ def sql_arrange(time_dict, cursor, max_time):
                 'platform': ''
             }
         else:
-            username = fix
-        
-        time = get_time(line[JOIN_TIME], line[LEAVE_TIME])
-        time_dict[username]['time'].append(time)
+            username = fix  # if the username exists, then correct the typos if necessary 
+        # updating the user's login data in the dictionary based on each line in the table:
+        time = get_time(line[JOIN_TIME], line[LEAVE_TIME])  # get a string of the login timeframe
+        time_dict[username]['time'].append(time)    # add the timeframe to the timeframes list
+        # because the temp table is sorted by join-time the timeframe list will also be sorted the same way
+        # then, update the platform string:
         time_dict[username]['platform'] = platform_updater(time_dict[username]['platform'], line[PLATFORM])
-        
+    # calculate the accurate overall login time of each user:
     for user in time_dict.keys():
+        # if more than one timeframe exists for the user then calculate the overall time:
         if len(time_dict[user]['time']) > 1:
             time_dict[user]['overall time'] =  time_updater(time_dict[user]['time'])
-            if time_dict[user]['overall time'] > max_time:
-                time_dict[user]['overall time'] = max_time
-        
+            """if time_dict[user]['overall time'] > max_time:
+                time_dict[user]['overall time'] = max_time"""
+        # update the string of all timeframes to be equal to the timeframes list delimited by ','
         time_dict[user]['time string'] = ', '.join(time_dict[user]['time'])
-        del time_dict[user]['time']
-
-def print_time_dict(time_dict):
-    for user in time_dict.keys():
-        print(time_dict[user])            
+        del time_dict[user]['time'] # no need for this list now that we're done with timeframes calculation       
     
-def insert_dict(time_dict, cursor, connection): 
+def insert_dict(time_dict, cursor, connection):
+    """
+    updates the final table "attendance" with the values from the participant's dictionary
+    :param time_dict: the participant's dictionary
+    :param cursor: the cursor to the mysql attendance database
+    :param connection: connection to the mysql datab
+    """
     for user in time_dict.keys():
-        
         insertOrUpdateQuery = """
             INSERT INTO attendance (
                 room_name,
@@ -336,9 +340,7 @@ def insert_dict(time_dict, cursor, connection):
                 overall_time = %(overall time)s,
                 platform = %(platform)s
         """
-        
         cursor.execute(insertOrUpdateQuery, time_dict[user])
-    
     connection.commit()
         
 def print_full_attendance(cursor):
