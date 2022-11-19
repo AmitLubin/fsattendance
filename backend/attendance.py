@@ -314,6 +314,8 @@ def insert_dict(time_dict, cursor, connection):
     :param cursor: the cursor to the mysql attendance database
     :param connection: connection to the mysql datab
     """
+    # insert the final values of the participant's dictionary from a csv file
+    # if 
     for user in time_dict.keys():
         insertOrUpdateQuery = """
             INSERT INTO attendance (
