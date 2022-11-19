@@ -2,11 +2,10 @@ from flask import Flask, request # flask requires installation
 from flask_cors import CORS
 from attendance import post_api, get_api, get_specific_api, get_avg_api, delete_api
 from dotenv import load_dotenv
-import json
 import os
 
 app = Flask(__name__)
-CORS(app) #needed to be removed once all is dockerized
+CORS(app)
 
 def category_second_checker(categories):
     checker = ['room_name', 'room_start', 'room_finish', 'name', 'email', 'time', 'overall_time', 'platform']
