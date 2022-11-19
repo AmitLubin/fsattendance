@@ -364,28 +364,8 @@ def sum_of_days(cursor):
         sum_days += (end_hours - start_hours)*60 + end_minutes - start_minutes
     return sum_days
 
-def get_average_specific(cursor, text_input):
-    sum_user = 0
-    cursor.execute(f" SELECT overall_time FROM attendance WHERE email = '{text_input}'; ")
-    res = cursor.fetchall()
-    
-    for i in res:
-        sum_user += int(i[0])
-    
-    sum_all_days = sum_of_days(cursor)
-    return (sum_user/sum_all_days)*100
-
-def get_average_dynamic(cursor, text_input):
-    sum_user = 0
-    cursor.execute(" SELECT email,overall_time FROM attendance; ")
-    res = cursor.fetchall()
-    
-    for i in res:
-        if jellyfish.damerau_levenshtein_distance(text_input, i[0]) < 3:
-            sum_user += int(i[1])
-    
-    sum_all_days = sum_of_days(cursor)
-    return (sum_user/sum_all_days)*100
+def get_average(cursor):
+    return 0
 
 def get_table(cursor, categories):
     cursor.execute(f" SELECT {categories} FROM attendance; ")
@@ -408,7 +388,46 @@ def get_table_dynamic(cursor, categories, input_type, input_text):
             i += 1
     
     return res
+
+def check_hebrew(s):
+    """
+    checks if a string contains any hebrew letter, if so returns true, else returns false
+    :param s: string
+    :return: bool
+    """
+    for c in s:
+        if ord('\u05d0') <= ord(c) <= ord('\u05ea'):    # if the character is in range of the unicode of hebrew letters
+            return True
+    return False
+
+def choose_name(origin_name, new_name):
+    """
+    Chooses a better name from a pair of two names
+    return: string of the better name
+    """
+    if check_hebrew(origin_name) and not check_hebrew(new_name):
+        return new_name
+    elif not check_hebrew(origin_name) and check_hebrew(new_name):
+        return origin_name
+    else:
+        if len(origin_name) > len(new_name):
+            return origin_name
+        else:
+            return new_name
     
+def reset_time_dict(time_dict):
+    for user in time_dict.keys():
+        time_dict[user] = {
+            'room': '',
+            'room start': '',
+            'room finish': '',
+            'name': time_dict[user]['name'],
+            'email': time_dict[user]['email'],
+            'time': [],
+            'time string': '',
+            'overall time': '',
+            'platform': ''
+        }
 
 def post_csv(dirpath):
     """
@@ -423,8 +442,9 @@ def post_csv(dirpath):
     csv_lst = get_files(dirpath)
     connection, cursor, error = init_sql()
     if error == True: return "Bad connection to database"
+    time_dict = {}
     for i in range(len(csv_lst)):
-        time_dict = {}
+        reset_time_dict(time_dict)
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
         insert_dict(time_dict, cursor, connection)
@@ -461,12 +481,11 @@ def get_specific_api(categories, input_type, input_text, dynamic):
         disable_connection(connection, cursor)
         return results
 
-def get_avg_api(input_text, dynamic):
+def get_avg_api():
     connection, cursor, error = init_sql()
     if error == True: return "Bad connection to database"
     try:
-        if dynamic: results = get_average_dynamic(cursor, input_text)
-        else: results = get_average_specific(cursor, input_text)
+        results = get_average(cursor)
     except:
         results = 'problem with request'
     finally:

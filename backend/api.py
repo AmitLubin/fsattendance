@@ -96,12 +96,7 @@ def get_mysql_specefic():
     
 @app.route('/average', methods=['GET'])
 def get_average():
-    input_text = request.args.get('input')
-    dynamic = request.args.get('dynamic')
-    if dynamic == None: dynamic = False
-    else: dynamic = True
-    
-    results = get_avg_api(input_text, dynamic)
+    results = get_avg_api()
     if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
         "status_code": 404
