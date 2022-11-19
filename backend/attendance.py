@@ -249,6 +249,32 @@ def time_updater(time_lst):
         overall += (eh - sh) * 60 + (em - sm)
             
     return overall
+
+def check_hebrew(s):
+    """
+    checks if a string contains any hebrew letter, if so returns true, else returns false
+    :param s: string
+    :return: bool
+    """
+    for c in s:
+        if ord('\u05d0') <= ord(c) <= ord('\u05ea'):    # if the character is in range of the unicode of hebrew letters
+            return True
+    return False
+
+def choose_name(origin_name, new_name):
+    """
+    Chooses a better name from a pair of two names
+    return: string of the better name
+    """
+    if check_hebrew(origin_name) and not check_hebrew(new_name):
+        return new_name
+    elif not check_hebrew(origin_name) and check_hebrew(new_name):
+        return origin_name
+    else:
+        if len(origin_name) > len(new_name):
+            return origin_name
+        else:
+            return new_name
         
 def sql_arrange(time_dict, cursor, max_time):
     """
@@ -290,6 +316,7 @@ def sql_arrange(time_dict, cursor, max_time):
             }
         else:
             username = fix
+            time_dict[username]['name'] = choose_name(time_dict[username]['name'], line[NAME])
         
         time = get_time(line[JOIN_TIME], line[LEAVE_TIME])
         time_dict[username]['time'].append(time)
@@ -302,11 +329,7 @@ def sql_arrange(time_dict, cursor, max_time):
                 time_dict[user]['overall time'] = max_time
         
         time_dict[user]['time string'] = ', '.join(time_dict[user]['time'])
-        del time_dict[user]['time']
-
-def print_time_dict(time_dict):
-    for user in time_dict.keys():
-        print(time_dict[user])            
+        del time_dict[user]['time']          
     
 def insert_dict(time_dict, cursor, connection): 
     for user in time_dict.keys():
@@ -341,11 +364,6 @@ def insert_dict(time_dict, cursor, connection):
     
     connection.commit()
         
-def print_full_attendance(cursor):
-    cursor.execute(" SELECT * FROM attendance; ")
-    res = cursor.fetchall()
-    print(res)
-
 def disable_connection(connection, cursor):
     cursor.close()
     connection.close()
@@ -388,32 +406,6 @@ def get_table_dynamic(cursor, categories, input_type, input_text):
             i += 1
     
     return res
-
-def check_hebrew(s):
-    """
-    checks if a string contains any hebrew letter, if so returns true, else returns false
-    :param s: string
-    :return: bool
-    """
-    for c in s:
-        if ord('\u05d0') <= ord(c) <= ord('\u05ea'):    # if the character is in range of the unicode of hebrew letters
-            return True
-    return False
-
-def choose_name(origin_name, new_name):
-    """
-    Chooses a better name from a pair of two names
-    return: string of the better name
-    """
-    if check_hebrew(origin_name) and not check_hebrew(new_name):
-        return new_name
-    elif not check_hebrew(origin_name) and check_hebrew(new_name):
-        return origin_name
-    else:
-        if len(origin_name) > len(new_name):
-            return origin_name
-        else:
-            return new_name
     
 def reset_time_dict(time_dict):
     for user in time_dict.keys():
@@ -428,6 +420,10 @@ def reset_time_dict(time_dict):
             'overall time': '',
             'platform': ''
         }
+
+def update_names(time_dict, cursor):
+    for user in time_dict.keys():
+        cursor.execute(f" UPDATE attendance SET name='{time_dict[user]['name']}' WHERE email='{time_dict[user]['email']}' ")
 
 def post_csv(dirpath):
     """
@@ -448,6 +444,7 @@ def post_csv(dirpath):
         max_overall = get_data(csv_lst[i], cursor)
         sql_arrange(time_dict, cursor, max_overall)
         insert_dict(time_dict, cursor, connection)
+    update_names(time_dict, cursor)
     disable_connection(connection, cursor)
     return "good connection"
 
@@ -492,3 +489,13 @@ def get_avg_api():
         disable_connection(connection, cursor)
         return results
 
+def delete_api():
+    connection, cursor, error = init_sql()
+    if error == True: return "Bad connection to database"
+    try:
+        results = 0
+    except:
+        results = 'problem with request'
+    finally:
+        disable_connection(connection, cursor)
+        return results
