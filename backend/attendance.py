@@ -292,12 +292,11 @@ def fill_empty_fields(line, user):
     if user['room finish'] == '': user['room finish'] = line[ROOM_FINISH]
     if user['overall time'] == '': user['overall time'] = line[OVERALL_TIME]
     
-def sql_arrange(time_dict, cursor, max_time):
+def sql_arrange(time_dict, cursor):
     """
     goes over each row in a meeting table and updates the paticipant's dictionary accordingly
     :param time_dict: a dictionary holding the login times of each participant in a meeting
     :param cursor: a cursor to the mysql attendance database
-    :param max_time: the maximal time one can be logged-in in a meeting 
     :return:
     """
     ROOM_NAME = 0
@@ -393,6 +392,11 @@ def insert_dict(time_dict, cursor, connection):
     connection.commit() # for the changes to be permanent
         
 def disable_connection(connection, cursor):
+    """
+    closes the connection to the mysql
+    :param connection: connection to the mysql database
+    :param cursor: cursor to the mysql database
+    """
     cursor.close()
     connection.close()
     return 0
@@ -493,8 +497,8 @@ def post_csv(dirpath):
     time_dict = {}
     for i in range(len(csv_lst)):
         reset_time_dict(time_dict)
-        max_overall = get_data(csv_lst[i], cursor)
-        sql_arrange(time_dict, cursor, max_overall)
+        get_data(csv_lst[i], cursor)
+        sql_arrange(time_dict, cursor)
         insert_dict(time_dict, cursor, connection)
     update_names(time_dict, cursor, connection)
     disable_connection(connection, cursor)
