@@ -4,15 +4,15 @@
     display: table-cell;
     border: solid black 1px;
     text-align: center;
-    height: 50px;
+    height: 10%;
 }
 
 .reg-cell {
-    width: 160px;
+    width: 10vw;
 }
 
 .mail-cell {
-    width: 400px;
+    width: 25vw;
 }
 
 .table-header {

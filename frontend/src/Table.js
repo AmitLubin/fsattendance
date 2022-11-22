@@ -29,19 +29,19 @@ function checkCategories(categoriesChecker){
 }
 
 function setTableWidth(categories, header){
-    let width = 16 + categories.length * 3;
+    let width = 0;
     categories.map(category => {
-        if (category == "Student mail")
-            width += 400;
+        if (category === "Student mail")
+            width += 25;
         else
-            width += 160;
+            width += 10;
     });
 
     if (header) return {
-        width: width.toString() + "px"
+        width: (width).toString() + "vw"
     };
     return {
-        width: (width+2).toString() + "px"
+        width: (width+0.9).toString() + "vw"
     };
 }
 
@@ -57,9 +57,9 @@ const Table = props => {
 
     return (
         <div id="table">
-            <table id="d-table" style={setTableWidth(categories, false)}>
+            <table id="d-table" tyle={setTableWidth(categories, true)}>
                 <thead id="table-header-row" style={setTableWidth(categories, true)}>
-                    <tr >
+                    <tr>
                         <TableHeader categories={categories} data={props.data} changeSortedState={props.changeSortedState}/>
                     </tr>
                 </thead>
