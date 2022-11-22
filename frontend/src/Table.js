@@ -55,8 +55,6 @@ const Table = props => {
     const categories = checkCategories(props.categories);
     if (categories.length === 0) return;
 
-    //setTableWidth(categories);
-
     return (
         <div id="table">
             <table id="d-table" style={setTableWidth(categories, false)}>
