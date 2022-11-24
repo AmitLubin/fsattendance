@@ -4,7 +4,7 @@ import Menu from "./Menu";
 import Table from "./Table";
 
 class App extends Component {
-    state = { data: [], categories: {
+    state = { data: [], error: false , categories: {
         roomName: true,
         roomStart: true,
         roomFinish: true,
@@ -21,7 +21,7 @@ class App extends Component {
     }
 
     changeState = (newDataValue, allCategories, newCategoriesValue) => {
-        this.setState({ data: newDataValue, categories: {
+        this.setState({ data: newDataValue, error: newDataValue.error, categories: {
             roomName: allCategories || newCategoriesValue.room_name,
             roomStart: allCategories || newCategoriesValue.room_start,
             roomFinish: allCategories || newCategoriesValue.room_finish,
@@ -35,7 +35,7 @@ class App extends Component {
     }
 
     changeAvgState = (newDataValue) => {
-        this.setState({ data: newDataValue, categories: {
+        this.setState({ data: newDataValue, error: newDataValue.error, categories: {
             roomName: false,
             roomStart: false,
             roomFinish: false,
@@ -56,7 +56,7 @@ class App extends Component {
         await fetch('http://localhost:5000/')
             .then(res => res.json())
             .then(newData => {;
-                this.setState({ data: newData.results });
+                this.setState({ data: newData.results, error: newData.error });
         });
     }
     
@@ -67,7 +67,7 @@ class App extends Component {
                     <Menu changeState={this.changeState} changeAvgState={this.changeAvgState}/>
                 </div>
                 <div className="table">
-                    <Table categories={this.state.categories} data={this.state.data} changeSortedState={this.changeSortedState}/>
+                    <Table categories={this.state.categories} data={this.state.data} changeSortedState={this.changeSortedState} error={this.state.error}/>
                 </div>
             </div>
         );

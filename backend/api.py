@@ -31,11 +31,13 @@ def insert_csv():
     results = post_api(folder)
     if results == 'Done!': return {
         "results": results,
-        "status_code": 200
+        "status_code": 200,
+        "error": False
     } 
     return {
         "results": results,
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
 
 @app.route('/', methods=['GET'])
@@ -43,22 +45,26 @@ def get_mysql_category():
     categories = category_checker(request.args.get('categories'))
     if not categories: return {
         "results": "Categories don't match",
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     
     results = get_api(categories)
     if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     elif len(results) == 0: return {
         "results": "No results",
-        "status_code": 204
+        "status_code": 204,
+        "error": False
     }
     return {
         "results": results,
         "status_code": 200,
-        "results_count": len(results)
+        "results_count": len(results),
+        "error": False
     }
 
 @app.route('/', methods=['DELETE'])
@@ -66,11 +72,13 @@ def delete_everythin():
     results = delete_api()
     if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     else: return {
         "results": results,
-        "status_code": 204
+        "status_code": 204,
+        "error": False
     }
 
 @app.route('/specific', methods=['GET'])
@@ -78,13 +86,15 @@ def get_mysql_specefic():
     input_type = request.args.get('type')
     if input_type != 'name' and input_type != 'email': return {
         "results": "Bad input types",
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     input_text = request.args.get('input')
     categories = category_checker(request.args.get('categories'))
     if not categories: return {
         "results": "Categories don't match",
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     dynamic = request.args.get('dynamic')
     if dynamic == None: dynamic = False
@@ -93,16 +103,19 @@ def get_mysql_specefic():
     results = get_specific_api(categories, input_type, input_text, dynamic)
     if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     elif len(results) == 0: return {
         "results": "No results",
-        "status_code": 204
+        "status_code": 204,
+        "error": False
     }
     return {
         "results": results,
         "status_code": 200,
-        "results_count": len(results)
+        "results_count": len(results),
+        "error": False
     }
     
 @app.route('/average', methods=['GET'])
@@ -110,16 +123,19 @@ def get_average():
     results = get_avg_api()
     if results == 'problem with request' or results == "Bad connection to database": return {
         "results": results,
-        "status_code": 404
+        "status_code": 404,
+        "error": True
     }
     elif len(results) == 0: return {
         "results": "No results",
-        "status_code": 204
+        "status_code": 204,
+        "error": False
     }
     return {
         "results": results,
         "status_code": 200,
-        "results_count": len(results)
+        "results_count": len(results),
+        "error": False
     }
     
 
