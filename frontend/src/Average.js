@@ -6,7 +6,7 @@ const Average = props => {
         await fetch('http://localhost:5000/average')
                 .then(res => res.json())
                 .then(newData => {
-                    props.changeAvgState(newData.results);
+                    props.changeAvgState(newData);
         });
     }
 

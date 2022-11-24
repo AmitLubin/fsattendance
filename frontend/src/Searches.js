@@ -43,7 +43,7 @@ const Searches = props => {
         await fetch('http://localhost:5000/' + categoriesString)
                 .then(res => res.json())
                 .then(newData => {
-                    props.changeState(newData.results, categories.all, categories.specific);
+                    props.changeState(newData, categories.all, categories.specific);
         });
         
     }

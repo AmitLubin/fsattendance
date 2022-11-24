@@ -6,9 +6,9 @@
     position: relative;
     cursor: pointer;
     display: inline-block;
-    padding: 5% 0;
+    padding: 0.75em 6em;
     border: 1px solid #ccc;
-    width: 240px;
+    
 }
 
 #dropdown-type .anchor:after {
@@ -32,7 +32,7 @@
 }
 
 #dropdown-type ul.items {
-    padding: 1%;
+    padding: 0.03em;
     display: none;
     margin: 0;
     border: 1px solid #ccc;

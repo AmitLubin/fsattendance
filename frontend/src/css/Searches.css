@@ -1,9 +1,7 @@
 .search-button {
-    width: 6vw;
-    height: 4.7vh;
+    padding: 1em;
 }
 
 .search-avg-button {
-    width: 6.5vw;
-    height: 4.7vh;
+    padding: 1em 1.2em;
 }

@@ -66,7 +66,7 @@ const SpecificSearches = props => {
         await fetch('http://localhost:5000/specific?' + categoriesString + inputType + inputText + dynamic)
                 .then(res => res.json())
                 .then(newData => {
-                    props.changeState(newData.results, categories.all, categories.specific);
+                    props.changeState(newData, categories.all, categories.specific);
         });
         
     }

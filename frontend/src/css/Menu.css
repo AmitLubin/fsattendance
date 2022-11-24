@@ -1,12 +1,15 @@
 .topnav {
   background-color: #333;
-  height: 50%;
+  height: 3em;
   width: 100%;
+  position: fixed;
 }
 
 .menu-item {
   float: left;
   text-align: center;
+  height: 100%;
+  position: relative;
 }
 
 .left-push {

@@ -58,7 +58,7 @@ def get_mysql_category():
     elif len(results) == 0: return {
         "results": "No results",
         "status_code": 204,
-        "error": False
+        "error": True
     }
     return {
         "results": results,
@@ -109,7 +109,7 @@ def get_mysql_specefic():
     elif len(results) == 0: return {
         "results": "No results",
         "status_code": 204,
-        "error": False
+        "error": True
     }
     return {
         "results": results,
@@ -129,7 +129,7 @@ def get_average():
     elif len(results) == 0: return {
         "results": "No results",
         "status_code": 204,
-        "error": False
+        "error": True
     }
     return {
         "results": results,

@@ -21,7 +21,7 @@ class App extends Component {
     }
 
     changeState = (newDataValue, allCategories, newCategoriesValue) => {
-        this.setState({ data: newDataValue, error: newDataValue.error, categories: {
+        this.setState({ data: newDataValue.results, error: newDataValue.error, categories: {
             roomName: allCategories || newCategoriesValue.room_name,
             roomStart: allCategories || newCategoriesValue.room_start,
             roomFinish: allCategories || newCategoriesValue.room_finish,
@@ -35,7 +35,7 @@ class App extends Component {
     }
 
     changeAvgState = (newDataValue) => {
-        this.setState({ data: newDataValue, error: newDataValue.error, categories: {
+        this.setState({ data: newDataValue.results, error: newDataValue.error, categories: {
             roomName: false,
             roomStart: false,
             roomFinish: false,
@@ -60,7 +60,7 @@ class App extends Component {
         });
     }
     
-    render() {
+    render() {  
         return(
             <div className="background">
                 <div className="menu">

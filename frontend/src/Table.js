@@ -46,8 +46,8 @@ function setTableWidth(categories, header){
 }
 
 const Table = props => {
-    if (props.error === true) {
-        console.log(props.data);
+    if (props.error == true) {
+        console.log(props.data)
         return;
     }
     if (props.data.length === 0) return;
