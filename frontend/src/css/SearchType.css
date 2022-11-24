@@ -6,7 +6,7 @@
     position: relative;
     cursor: pointer;
     display: inline-block;
-    padding: 10px 0 10px 0;
+    padding: 5% 0;
     border: 1px solid #ccc;
     width: 240px;
 }
@@ -16,9 +16,9 @@
     content: "";
     border-left: 2px solid black;
     border-top: 2px solid black;
-    padding: 5px;
-    right: 10px;
-    top: 20%;
+    padding: 0.35em;
+    right: 0.7em;
+    top: 25%;
     -moz-transform: rotate(-135deg);
     -ms-transform: rotate(-135deg);
     -o-transform: rotate(-135deg);
@@ -32,7 +32,7 @@
 }
 
 #dropdown-type ul.items {
-    padding: 2px;
+    padding: 1%;
     display: none;
     margin: 0;
     border: 1px solid #ccc;
