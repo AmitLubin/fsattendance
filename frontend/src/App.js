@@ -53,7 +53,7 @@ class App extends Component {
     }
 
     async componentDidMount(){
-        await fetch('http://localhost:5000/')
+        await fetch(process.env.REACT_APP_PUBLIC_IP)
             .then(res => res.json())
             .then(newData => {;
                 this.setState({ data: newData.results, error: newData.error });

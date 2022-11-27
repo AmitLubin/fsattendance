@@ -1,6 +1,5 @@
 .topnav {
   background-color: #333;
-  height: 3em;
   width: 100%;
   position: fixed;
 }
@@ -8,16 +7,10 @@
 .menu-item {
   float: left;
   text-align: center;
-  height: 100%;
-  position: relative;
 }
 
 .left-push {
   padding-left: 1%;
-}
-
-.checkbox-dynamic {
-  float: left;
 }
 
 .padding-top {
@@ -26,11 +19,21 @@
 
 .dynamic-search-label {
   font-size: 0.95rem;
-  margin-top: 12.5%;
+  float: left;
+  padding-left: 1em;
+}
+
+.checkbox-dynamic {
+  float: left;
+  margin: 12.5% 0%;
+}
+
+.dynamic-search {
+  float: left;
 }
 
 .leftmost {
-  width: 12%;
+  padding-left: .2vw;
 }
 
 .left-push-bigger{
@@ -41,10 +44,11 @@
   padding-left: 6%;
 }
 
+.right-push{
+  padding-right: 2vw;
+}
+
 .rightmost{
-  width: 10%;
   float: right;
   text-align: center;
-  
-  padding-right: 0.4%;
 }

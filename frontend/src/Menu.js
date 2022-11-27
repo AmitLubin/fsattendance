@@ -37,12 +37,15 @@ class Menu extends React.Component {
                 <div className="menu-item left-push">
                     <Searches changeState={this.props.changeState} action={this.state.action} />
                 </div>
-                <div className="menu-item left-push-bigger padding-top">
-                    <input type="checkbox" id="dynamic-checkbox" className="checkbox-dynamic"/>
+                <div className="menu-item left-push">
+                    <div className="checkbox-dynamic">
+                        <input type="checkbox" id="dynamic-checkbox" className="checkbox-dynamic"/>
+                    </div>
+                    <div className="dynamic-search" >
+                        <p className="dynamic-search-label">Dynamic Search</p>
+                    </div>
                 </div>
-                <div className="menu-item left-push" >
-                    <p className="dynamic-search-label">Dynamic Search</p>
-                </div>
+                
                 <div className="menu-item left-push">
                     <SearchType searchByUpdater={this.stateUpdater} searchByState={this.state.searchBy}/>
                 </div>
@@ -57,7 +60,7 @@ class Menu extends React.Component {
                 <div className="rightmost">
                     <Update action={this.state.action} actionOn={this.actionOnUpdater} actionOff={this.actionOffUpdater}/>
                 </div>
-                <div className="rightmost">
+                <div className="rightmost right-push">
                     <Delete action={this.state.action} actionOn={this.actionOnUpdater} actionOff={this.actionOffUpdater}/>
                 </div>
             </div> 

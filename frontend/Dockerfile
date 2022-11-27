@@ -5,6 +5,10 @@ WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
 RUN npm ci
+
+ARG REACT_APP_PUBLIC_IP
+ENV REACT_APP_PUBLIC_IP $REACT_APP_PUBLIC_IP
+
 COPY . .
 RUN npm run build --prod
 
