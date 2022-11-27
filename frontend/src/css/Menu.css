@@ -7,15 +7,15 @@
 .menu-item {
   float: left;
   text-align: center;
-  max-height: 3em;
+  max-height: 3rem;
 }
 
 .left-push {
-  padding-left: 1%;
+  padding-left: 1rem;
 }
 
 .padding-top {
-  padding-top: 0.6%;
+  padding-top: 0.6rem;
 }
 
 .dynamic-search-label {
@@ -26,7 +26,7 @@
 
 .checkbox-dynamic {
   float: left;
-  margin: 12.5% 0%;
+  margin: .6em 0%;
 }
 
 .dynamic-search {
@@ -34,22 +34,18 @@
 }
 
 .leftmost {
-  padding-left: .2vw;
-}
-
-.left-push-bigger{
-  padding-left: 2.5%;
+  padding-left: .1rem;
 }
 
 .left-push-massive{
-  padding-left: 6%;
+  padding-left: 8rem;
 }
 
 .right-push{
-  padding-right: 2vw;
+  padding-right: 2.7rem;
 }
 
-.rightmost{
+.right-menu-item{
   float: right;
   text-align: center;
   max-height: 3em;

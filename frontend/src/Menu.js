@@ -57,10 +57,10 @@ class Menu extends React.Component {
                 </div>
 
 
-                <div className="rightmost">
+                <div className="right-menu-item">
                     <Update action={this.state.action} actionOn={this.actionOnUpdater} actionOff={this.actionOffUpdater}/>
                 </div>
-                <div className="rightmost right-push">
+                <div className="right-menu-item right-push">
                     <Delete action={this.state.action} actionOn={this.actionOnUpdater} actionOff={this.actionOffUpdater}/>
                 </div>
             </div> 
