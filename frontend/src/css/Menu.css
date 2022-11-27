@@ -7,6 +7,7 @@
 .menu-item {
   float: left;
   text-align: center;
+  max-height: 3em;
 }
 
 .left-push {
@@ -51,4 +52,5 @@
 .rightmost{
   float: right;
   text-align: center;
+  max-height: 3em;
 }
