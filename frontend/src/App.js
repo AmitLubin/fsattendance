@@ -1,5 +1,4 @@
 import { Component } from "react";
-import './css/App.css';
 import Menu from "./Menu";
 import Table from "./Table";
 

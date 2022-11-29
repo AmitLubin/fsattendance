@@ -1,7 +1,10 @@
 .topnav {
   background-color: #333;
+  top: 0;
+  left: 0;
   width: 100%;
   position: fixed;
+  z-index: 1;
 }
 
 .menu-item {
@@ -11,21 +14,21 @@
 }
 
 .left-push {
-  padding-left: 1rem;
+  margin-left: 1rem;
 }
 
 .padding-top {
-  padding-top: 0.6rem;
+  margin-top: 0.6rem;
 }
 
 .dynamic-search-label {
   font-size: 0.95rem;
-  float: left;
-  padding-left: 1em;
+  float: inherit;
+  margin-left: 1em;
 }
 
 .checkbox-dynamic {
-  float: left;
+  float: inherit;
   margin: .6em 0%;
 }
 
@@ -34,19 +37,19 @@
 }
 
 .leftmost {
-  padding-left: .1rem;
+  margin-left: .1rem;
 }
 
 .left-push-massive{
-  padding-left: 8rem;
+  margin-left: 8rem;
 }
 
 .right-push{
-  padding-right: 2.7rem;
+  margin-right: 2.7rem;
 }
 
 .right-menu-item{
   float: right;
   text-align: center;
-  max-height: 3em;
+  max-height: 3rem;
 }

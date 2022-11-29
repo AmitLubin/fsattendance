@@ -28,22 +28,22 @@ function checkCategories(categoriesChecker){
     return categories;
 }
 
-function setTableWidth(categories, header){
+/*function setTableWidth(categories, header){
     let width = 0;
     categories.map(category => {
         if (category === "Student mail")
-            width += 25;
+            width += 30;
         else
             width += 10;
     });
 
     if (header) return {
-        width: (width).toString() + "vw"
+        width: (width).toString() + "%"
     };
     return {
-        width: (width+0.9).toString() + "vw"
+        width: (width+2).toString() + "%"
     };
-}
+}*/
 
 const Table = props => {
     if (props.error == true) {
@@ -56,20 +56,19 @@ const Table = props => {
     if (categories.length === 0) return;
 
     return (
-        <div id="table">
-            <table id="d-table" tyle={setTableWidth(categories, true)}>
-                <thead id="table-header-row" style={setTableWidth(categories, true)}>
-                    <tr>
-                        <TableHeader categories={categories} data={props.data} changeSortedState={props.changeSortedState}/>
-                    </tr>
-                </thead>
-                <tbody id="table-body" style={setTableWidth(categories, false)}>
-                    <TableBody categories={categories} data={props.data} />
-                </tbody>
-            </table>
-        </div>
-        
+        <table id="d-table">
+            <thead id="table-header-row" >
+                <tr>
+                    <TableHeader categories={categories} data={props.data} changeSortedState={props.changeSortedState}/>
+                </tr>
+            </thead>
+            <tbody id="table-body" >
+                <TableBody categories={categories} data={props.data} />
+            </tbody>
+        </table>
     );
 }
 
+
+//style={setTableWidth(categories, true)}
 export default Table;

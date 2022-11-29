@@ -39,8 +39,6 @@ const Searches = props => {
         if (categories.all == false) {
             categoriesString = getCategoriesString(categoriesString, categories.specific);
         }
-
-        console.log(process.env);
             
         await fetch(process.env.REACT_APP_PUBLIC_IP + categoriesString)
                 .then(res => res.json())

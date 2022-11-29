@@ -9,18 +9,21 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     table-layout: fixed;
     background-color: aquamarine;
-}
-
-#table-body {
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 35rem;
-    display: block;
-    text-align: left;
+    display: grid;
+    overflow-y: scroll;
+    width: 80%;
 }
 
 #table-header-row {
-    overflow-x: hidden;
     display: block;
     border: solid black 1px;
+    position: sticky;
+    top: 0;
 }
+
+#table-body {
+    display: block;
+    max-height: 60vh;
+}
+
+
