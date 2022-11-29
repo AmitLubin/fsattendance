@@ -11,19 +11,16 @@
     background-color: aquamarine;
     display: grid;
     overflow-y: scroll;
-    width: 80%;
+    max-width: 110%;
+    max-height: 80%;
 }
 
 #table-header-row {
-    display: block;
-    border: solid black 1px;
+    display: table-header-group;
     position: sticky;
     top: 0;
 }
 
 #table-body {
-    display: block;
-    max-height: 60vh;
+    display: table-cell;
 }
-
-

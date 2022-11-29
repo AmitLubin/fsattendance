@@ -1,10 +1,11 @@
 .table-cell {
+    font-size: max(1rem);
     overflow: hidden;
     text-overflow: ellipsis;
     display: table-cell;
     border: solid black 1px;
     text-align: center;
-    height: 10%;
+    max-height: 10%;
 }
 
 .reg-cell {
