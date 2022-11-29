@@ -3,7 +3,7 @@ import "./css/Searches.css";
 
 const Average = props => {
     async function getAverage(e) {
-        await fetch(process.env.REACT_APP_PUBLIC_IP)
+        await fetch(process.env.REACT_APP_PUBLIC_IP + 'average')
                 .then(res => res.json())
                 .then(newData => {
                     props.changeAvgState(newData);

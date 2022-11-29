@@ -1,19 +1,19 @@
 .table-cell {
-    font-size: max(1rem);
+    overflow-wrap: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
     display: table-cell;
     border: solid black 1px;
     text-align: center;
-    max-height: 10%;
+    word-break: break-all;
 }
 
 .reg-cell {
-    width: 11%;
+    width: 12%;
 }
 
 .mail-cell {
-    width: 23%;
+    width: 16%;
 }
 
 .table-header {
