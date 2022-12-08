@@ -12,6 +12,7 @@ RUN apk add --update --no-cache openssh
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY csv_files/* ./csv_files
 COPY attendance.py .
 COPY api.py .
 

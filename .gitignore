@@ -2,7 +2,8 @@
 **/*pycache*/
 **/*.ssh/
 **/*csv*files/
-**/dc.yml
+**/node_modules
 **/build-back.sh
 **/build-front.sh
+**/clean-compose.sh
 **/Doc
