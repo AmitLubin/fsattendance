@@ -2,13 +2,13 @@ version: '3'
 services:
   backend:
     image: 'amitlubin/attendance-backend:latest'
-    ports: 
-      - "5000:5000"
     restart: always
     env_file:
       - environmentals/.env
     depends_on:
       - mysql
+    #ports: 
+    #  - "5000:5000"
   
   mysql:
     image: 'mysql:latest'
@@ -20,5 +20,11 @@ services:
     image: 'amitlubin/attendance-frontend:latest'
     depends_on:
       - backend
+    #ports:
+    #  - "3000:3000"
+
+  nginx:
+    image: 'amitlubin/attendance-nginx:latest'
+    restart: always
     ports:
-      - "3000:3000"
+      - '3050:80'
