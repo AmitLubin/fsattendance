@@ -6,4 +6,5 @@
 **/build-back.sh
 **/build-front.sh
 **/clean-compose.sh
+**/build-nginx.sh
 **/Doc
