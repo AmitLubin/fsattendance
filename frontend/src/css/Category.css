@@ -1,9 +1,3 @@
-.dropdown-check-list {
-    display: inline-block;
-    width: 100%;
-    
-}
-  
 .dropdown-check-list .anchor {
     position: relative;
     cursor: pointer;

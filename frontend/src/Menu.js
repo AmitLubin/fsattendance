@@ -31,7 +31,7 @@ class Menu extends React.Component {
     render(){
         return(
             <div className="topnav">
-                <div className="menu-item leftmost">
+                <div className="menu-item leftmost left-push">
                     <Category />
                 </div>
                 <div className="menu-item left-push">
@@ -49,18 +49,18 @@ class Menu extends React.Component {
                 <div className="menu-item left-push">
                     <SearchType searchByUpdater={this.stateUpdater} searchByState={this.state.searchBy}/>
                 </div>
-                <div className="menu-item left-push">
+                <div className="menu-item left-push-massive">
                     <SpecificSearches changeState={this.props.changeState} searchByState={this.state.searchBy} action={this.state.action}/>
                 </div>
-                <div className="menu-item left-push-massive">
+                <div className="menu-item">
                     <Average changeAvgState={this.props.changeAvgState} action={this.state.action} />
                 </div>
 
 
-                <div className="right-menu-item">
+                <div className="right-menu-item right-push">
                     <Update action={this.state.action} actionOn={this.actionOnUpdater} actionOff={this.actionOffUpdater}/>
                 </div>
-                <div className="right-menu-item right-push">
+                <div className="right-menu-item">
                     <Delete action={this.state.action} actionOn={this.actionOnUpdater} actionOff={this.actionOffUpdater}/>
                 </div>
             </div> 
