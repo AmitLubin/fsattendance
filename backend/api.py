@@ -7,6 +7,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+
 def category_second_checker(categories):
     checker = ['room_name', 'room_start', 'room_finish', 'name', 'email', 'time', 'overall_time', 'platform']
     for req in categories:
@@ -24,7 +25,7 @@ def category_checker(categories):
 
 @app.route('/', methods=['POST'])
 def insert_csv():
-    #load_dotenv()
+    # load_dotenv()
     #source_ssh = os.getenv("SSH_ADDRESS")
     #os.system(f'scp -i ./.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {source_ssh} ./csv_files/')
     folder = 'csv_files/'

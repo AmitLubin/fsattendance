@@ -31,14 +31,21 @@ def init_sql():
     :return: the connection to the database, 
         the cursor of the database and whether an error has occured or not
     """
+    print("Entered")
     # loading the environment variables from the env-file:
     load_dotenv()
     mysql_user = os.getenv("MYSQL_USER")
     mysql_password = os.getenv("MYSQL_PASSWORD")
     mysql_host = os.getenv("MYSQL_HOST")
     mysql_database = os.getenv("MYSQL_DATABASE")
+    
+    print("user", mysql_user)
+    print("host", mysql_host)
+    print("password", mysql_password)
+    
     # connecting to mysql:
-    try: 
+    try:
+        print("trying") 
         connection = mysql.connector.connect(
             host = mysql_host,
             database = mysql_database,
@@ -550,6 +557,7 @@ def delete_database(cursor, connection):
     return "Database deleted successfully"
 
 def post_api(dir):
+    print("Post-API")
     if not os.path.isdir(dir):
         return 'Not a Directory!'
     check_connection = post_csv(dir)
@@ -600,3 +608,7 @@ def delete_api():
     finally:
         disable_connection(connection, cursor)
         return results
+
+if __name__ == '__main__':
+    connection, cursor, error = init_sql()
+    print(connection,cursor,error)

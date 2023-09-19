@@ -3,18 +3,24 @@ services:
   backend:
     image: 'amitlubin/attendance-backend:latest'
     restart: always
-    env_file:
-      - environmentals/.env
     depends_on:
       - mysql
-    #ports: 
+    env_file:
+      - environmentals/.env
+    # ports: 
     #  - "5000:5000"
+    # environment:
+    #   - MYSQL_HOST=mysql
+    
   
   mysql:
-    image: 'mysql:latest'
+    image: 'mysql:8'
     env_file:
       - environmentals/.env
     restart: always
+    hostname: mysql
+    # ports:
+    #   - "3306:3306"
 
   frontend:
     image: 'amitlubin/attendance-frontend:latest'
