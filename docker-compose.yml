@@ -26,6 +26,8 @@ services:
     image: 'amitlubin/attendance-frontend:latest'
     depends_on:
       - backend
+    env_file:
+      - environmentals/.env
     #ports:
     #  - "3000:3000"
 
