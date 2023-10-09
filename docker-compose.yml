@@ -8,10 +8,7 @@ services:
     env_file:
       - environmentals/.env
     # ports: 
-    #  - "5000:5000"
-    # environment:
-    #   - MYSQL_HOST=mysql
-    
+    #  - "5000:5000"    
   
   mysql:
     image: 'mysql:8'
