@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1  # Number of desired replicas
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8
+          ports:
+            - containerPort: 3306
+          resources:
+            limits:
+              cpu: "1"  # Maximum of 0.5 CPU cores
+              memory: "2048Mi"  # Maximum of 512 MiB of memory
+          envFrom:
+            - configMapRef:
+                name: mysql-config-map
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config-map
+data:
+  MYSQL_USER: "yona"
+  MYSQL_PASSWORD: "1234"
+  MYSQL_ROOT_PASSWORD: "1234"
+  MYSQL_DATABASE: "attendance"

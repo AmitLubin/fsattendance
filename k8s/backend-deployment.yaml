@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1  # Number of desired replicas
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: amitlubin/attendance-backend:latest
+          ports:
+            - containerPort: 5000
+          resources:
+            limits:
+              cpu: "0.5"  # Maximum of 0.5 CPU cores
+              memory: "512Mi"  # Maximum of 512 MiB of memory
+          envFrom:
+            - configMapRef:
+                name: backend-config-map
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config-map
+data:
+  MYSQL_USER: "yona"
+  MYSQL_PASSWORD: "1234"
+  MYSQL_ROOT_PASSWORD: "1234"
+  MYSQL_HOST: mysql-cluster-ip
+  MYSQL_DATABASE: "attendance"
